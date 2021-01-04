@@ -1,0 +1,5 @@
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = WcatBootPkg
+  PACKAGE_GUID                   = 75d7ca7c-6345-443d-a1ef-85566e8a6c4b
+  PACKAGE_VERSION                = 0.1

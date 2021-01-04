@@ -1,0 +1,4 @@
+BOOTX64.EFI
+../../kernel.elf
+../../NvVars
+!.gitignore

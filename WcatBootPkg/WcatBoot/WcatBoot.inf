@@ -1,0 +1,27 @@
+[Defines]
+  INF_VERSION                    = 0x00010006
+  BASE_NAME                      = WcatBoot
+  FILE_GUID                      = f9cf4443-8b0d-4526-ac80-8f1ac75d7866
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 0.1
+  ENTRY_POINT                    = UefiMain
+
+[Sources]
+  WcatBoot.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  UefiLib
+  UefiApplicationEntryPoint
+
+[Guids]
+  gEfiFileInfoGuid
+  gEfiAcpiTableGuid
+
+[Protocols]
+  gEfiLoadedImageProtocolGuid
+  gEfiLoadFileProtocolGuid
+  gEfiSimpleFileSystemProtocolGuid
+  gEfiBlockIoProtocolGuid
