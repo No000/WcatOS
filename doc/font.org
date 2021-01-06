@@ -20,3 +20,9 @@
    TotsugekitaiさんのminOSv2のコードが参考となる
 *** リンク
 	- [[https://github.com/Totsugekitai/minOSv2][minOSv2]]
+* .sfnを.oに変換する方法
+** ldかld.lldを使う場合
+   #+BEGIN_SRC sh
+   ld.lld -r -b binary -m elf_x86_64 -o FreeSerifB.o FreeSerifB.sfn
+   #+END_SRC
+   これで変換ができる。
