@@ -1,0 +1,28 @@
+* フォント
+  最初はFT2をくみこめたらいいと考えたが、調べてみると依存関係がかなり大きかった。よって色々調べた結果、以下のようなフォントの実装の仕方を知ることができた。
+** SDLのフォントから移植する
+   SDLにはhariboteOSのfont.txtのようなビットマップフォントが配列で定義されている。よって、レンダラーを書き換えるだけで容易に移植することができると考えることができる。
+*** リンク
+	- [[http://nurd.se/~noname/?section=sdl_picofont][sdl_picofont]]
+	- [[https://www.libsdl.org/download-2.0.php][SDL2.0から見たい場合はSDL_test_font.c内にある]]
+** Scalable Screen Font 2.0を利用する
+   FT2上に構築された、依存がとてつもなく少ないフォントレンダラー。.sfnをレンダリングしてくれるそう。
+*** 組み込む際
+	最小限のビットマップフォント等の場合は、メモリ管理機能は必要ない。しかし、全機能を使う場合は必要となる。（一部制限があるも全機能をメモリ機能なしでも使用は頑張ればできるっぽい）
+**** リンク
+	 - [[https://wiki.osdev.org/Scalable_Screen_Font][OSdev.org[Scalable_Screen_Font]​]]
+	 - [[https://gitlab.com/bztsrc/scalable-font2/-/tree/master][Scalable Screen Font 2.0]]
+*** .sfnファイルはどうやって組み込む？
+	ブートローダーで組み込んだり、objcopyで.oファイルにし、リンクする方法があるっぽい。
+**** リンク
+	 - [[https://forum.osdev.org/viewtopic.php?t=36711][OSdev.org-viewtopic[How do I load a .sfn font into my kernel?]​]]
+** HariboteOSのフォントを移植
+   TotsugekitaiさんのminOSv2のコードが参考となる
+*** リンク
+	- [[https://github.com/Totsugekitai/minOSv2][minOSv2]]
+* .sfnを.oに変換する方法
+** ldかld.lldを使う場合
+   #+BEGIN_SRC sh
+   ld.lld -r -b binary -m elf_x86_64 -o FreeSerifB.o FreeSerifB.sfn
+   #+END_SRC
+   これで変換ができる。
