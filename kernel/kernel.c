@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "graphic.h"
+#include "font.h"
 
 /* スケーラブルスクリーンフォントは後日へ */
 /* #define SSFN_CONSOLEBITMAP_HICOLOR /\* use the special renderer for hicolor     \ */
@@ -26,6 +27,23 @@ void hlt() {
   __asm__("hlt");
 }
 
+		/* 8x16サイズのbitmapfontの描画実験 */
+/* 本来であれば改行コード等をswitchで分岐させる必要があるが、今回は文字の出力チェックなのでなし
+ */
+/* 1文字しかかけないことに注意 */
+void print_char(char c, VIDEO_INFO video_info) {
+  uint32_t cursor_x = 0, cursor_y = 0;
+  int x = 0, y = 0;
+  /* 実験なのでインデックスは0固定 */
+  for (y = 0; y < FONT_HEIGHT; y++) {
+	for (x = 0; x < FONT_WIDTH; x++) {
+	  if (font_bitmap[(uint32_t)c][y][x])
+		drow_pixel(cursor_x + x, cursor_y + y, BLACK, video_info);
+	}
+  }
+}
+
+
 void kernel_main(VIDEO_INFO *video_infomation) {
   int i;
   uint8_t output_data[14] = "kernel_success";
@@ -42,8 +60,11 @@ void kernel_main(VIDEO_INFO *video_infomation) {
     frame_buffer[i].blue_mask = 0x2f;
   }
   drow_pixel(1, 100, BLACK, *video_infomation);
-		drow_horizon_pixel(100, 100, 500, BLACK, *video_infomation);
-		drow_vertical_pixel(100, 100, 300, BLACK, *video_infomation);
+  drow_horizon_pixel(100, 100, 500, BLACK, *video_infomation);
+  drow_vertical_pixel(100, 100, 300, BLACK, *video_infomation);
+
+  print_char('"', *video_infomation);
+ 
 
 		
 /* ssfn_src = (uint8_t *)&_binary_FreeSerifB_sfn_start;      /\* the bitmap font to use *\/ */
