@@ -2,6 +2,8 @@
 # Makefile
 #
 
+# Totsugekitaiさんのをベースにカスタム
+# https://github.com/Totsugekitai/minOSv2/blob/master/Makefile
 
 .PHONY: boot kernel run
 QEMU = qemu-system-x86_64

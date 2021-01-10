@@ -30,4 +30,6 @@
   - [ ] ASCIIコードの記号を追加実装
   - [ ] GOPの情報を毎回引数で渡さなくて言いようにする
   - [ ] print_string関数の実装
+  - [ ] source edksetup.shを自動化する
 
+	
