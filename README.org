@@ -9,7 +9,7 @@
   - QEMU emulator version 5.2.0
 
 * 開発環境
-  toolディレクトリにedk2を追加する(これはまだやっても意味がないです)
+  toolディレクトリにedk2を追加する
   #+BEGIN_SRC shell
   git clone https://github.com/tianocore/edk2
   #+END_SRC
@@ -19,7 +19,13 @@
   make -C BaseTools/Source/C
   #+END_SRC
 
-  その後、tool内にあるtarget.txtをedk2/Confにコピペします。
+  その後、tool/Wcatboot_target内にあるtarget.txtをedk2/Confにコピペします。
+  そして、toolディレクトリ内にOVMF.fdを置き、WcatOSディレクトリ内で
+  #+BEGIN_SRC shell
+  make all
+  #+END_SRC
+
+  とすれば実行できます。
   
 * 参考文献
   - [[https://github.com/uchan-nos/mikanos][MikanOS]]
@@ -30,4 +36,6 @@
   - [ ] ASCIIコードの記号を追加実装
   - [ ] GOPの情報を毎回引数で渡さなくて言いようにする
   - [ ] print_string関数の実装
+  - [ ] source edksetup.shを自動化する
 
+	
