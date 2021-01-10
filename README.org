@@ -1,0 +1,33 @@
+* WcatOS
+猫(1010)がマイペースにちまちま作ってるOS
+
+* 使用しているツール
+  clangとLLD,Qemuに関してはManjaroLinuxで開発している関係上、バージョンが変わるかもしれません。
+  - EDK2
+  - clang version 11.0.0
+  - LLD 11.0.0 (compatible with GNU linkers)
+  - QEMU emulator version 5.2.0
+
+* 開発環境
+  toolディレクトリにedk2を追加する(これはまだやっても意味がないです)
+  #+BEGIN_SRC shell
+  git clone https://github.com/tianocore/edk2
+  #+END_SRC
+  クローンした後、セットアップとして以下のコマンドを実行します。（これは今後シェルスクリプトにする予定です）
+  #+BEGIN_SRC shell
+  git submodule update --init
+  make -C BaseTools/Source/C
+  #+END_SRC
+
+  その後、tool内にあるtarget.txtをedk2/Confにコピペします。
+  
+* 参考文献
+  - [[https://github.com/uchan-nos/mikanos][MikanOS]]
+  - [[http://yuma.ohgami.jp/][大神　祐真さんの自作OS関連の資料]]
+  - [[https://github.com/Totsugekitai/minOS][minOS]]
+
+* ToDOリスト
+  - [ ] ASCIIコードの記号を追加実装
+  - [ ] GOPの情報を毎回引数で渡さなくて言いようにする
+  - [ ] print_string関数の実装
+
