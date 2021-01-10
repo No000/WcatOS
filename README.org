@@ -13,6 +13,13 @@
   #+BEGIN_SRC shell
   git clone https://github.com/tianocore/edk2
   #+END_SRC
+  クローンした後、セットアップとして以下のコマンドを実行します。（これは今後シェルスクリプトにする予定です）
+  #+BEGIN_SRC shell
+  git submodule update --init
+  make -C BaseTools/Source/C
+  #+END_SRC
+
+  その後、tool内にあるtarget.txtをedk2/Confにコピペします。
   
 * 参考文献
   - [[https://github.com/uchan-nos/mikanos][MikanOS]]

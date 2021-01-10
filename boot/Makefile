@@ -16,6 +16,6 @@ default:
 ifeq ($(EDK_WORKSPACE),)
 	echo "$(error EDK PATH not set)"
 else
-	ln -sf $(ROOTDIR)/boot/MinLoaderPkg $(EDK_WORKSPACE)
+	ln -sf $(ROOTDIR)/boot/WcatBootPkg $(EDK_WORKSPACE)
 	cd $(EDK_WORKSPACE); build
 endif

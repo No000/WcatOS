@@ -26,6 +26,9 @@ LDFLAGS = 	--entry kernel_main \
 
 .PHONY: clean
 
+default :
+	$(MAKE) kernel.elf
+
 kernel.o: kernel.c font.h
 	$(CC) $(CFLAGS) -c $<
 
