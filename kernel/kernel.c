@@ -2,13 +2,6 @@
 #include "graphic.h"
 #include "font.h"
 
-/* スケーラブルスクリーンフォントは後日へ */
-/* #define SSFN_CONSOLEBITMAP_HICOLOR /\* use the special renderer for hicolor     \ */
-/*                                       packed pixels *\/ */
-/* #define NULL (void *)0 */
-/* #include "scalable-font2/ssfn.h" */
-/* extern unsigned char _binary_FreeSerifB_sfn_start; */
-
   color BLACK = {0x00, 0x00, 0x00};
 
 #define INTEL_ASM_BEGIN ".intel_syntax noprefix\n\t" /* clangの場合.att_syntax prefixは必要ない */
@@ -97,21 +90,7 @@ void kernel_main(VIDEO_INFO *video_infomation) {
   /* print_char('A', *video_infomation); */
 
 
-  print_string("!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_", *video_infomation);
-  /* ssfn_src = (uint8_t *)&_binary_FreeSerifB_sfn_start;      /\* the bitmap
-   * font to use *\/ */
-
-  /* ssfn_dst.ptr = video_infomation->frame_buffer_addr;                  /\*
-   * address of the linear frame buffer *\/ */
-  /* ssfn_dst.w = video_infomation->pixel_per_scanline; /\* width *\/ */
-  /* ssfn_dst.h = video_infomation->vertical_size;                           /\*
-   * height *\/ */
-  /* ssfn_dst.p = video_infomation->pixel_per_scanline; /\* bytes per line *\/
-   */
-  /*   ssfn_dst.x = ssfn_dst.y = 0;             /\* pen position *\/ */
-  /*   ssfn_dst.fg = 0xFFFFFFFF;                /\* foreground color *\/ */
-  /*   ssfn_dst.bg = 0xFF000000;                /\* background color *\/ */
-  /* ssfn_putc(0x41); */
+  print_string("!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", *video_infomation);
  
   while (1)
     hlt();
