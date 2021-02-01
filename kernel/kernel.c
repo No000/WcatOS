@@ -2,7 +2,7 @@
 #include "graphic.h"
 #include "font.h"
 
-  color BLACK = {0x00, 0x00, 0x00};
+color BLACK = {0x00, 0x00, 0x00};
 
 #define INTEL_ASM_BEGIN ".intel_syntax noprefix\n\t" /* clangの場合.att_syntax prefixは必要ない */
 
