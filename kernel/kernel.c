@@ -1,3 +1,14 @@
+/**
+ * @file   kernel.c
+ * @author toto <toto@toto-vm-development>
+ * @date   Tue Feb  2 00:36:02 2021
+ * 
+ * @brief  WcatOSのカーネル
+ * 
+ * 
+ */
+
+
 #include <stdint.h>
 #include "graphic.h"
 #include "font.h"
