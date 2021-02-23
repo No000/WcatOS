@@ -18,9 +18,9 @@
 #                                               working directory does not contain one or more description
 #                                               files.
 #ACTIVE_PLATFORM       = EmulatorPkg/EmulatorPkg.dsc
-#ACTIVE_PLATFORM       = OvmfPkg/OvmfPkgX64.dsc
+ACTIVE_PLATFORM       = OvmfPkg/OvmfPkgX64.dsc
 #ACTIVE_PLATFORM       = HelloPkg/HelloPkg.dsc
-ACTIVE_PLATFORM       = WcatBootPkg/WcatBoot.dsc
+#ACTIVE_PLATFORM       = WcatBootPkg/WcatBoot.dsc
 
 
 #  TARGET                List       Optional    Zero or more of the following: DEBUG, RELEASE, NOOPT
