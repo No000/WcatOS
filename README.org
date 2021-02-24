@@ -2,40 +2,67 @@
 猫(1010)がマイペースにちまちま作ってるOS
 
 * 使用しているツール
-  clangとLLD,Qemuに関してはManjaroLinuxで開発している関係上、バージョンが変わるかもしれません。
-  - EDK2
-  - clang version 11.0.0
-  - LLD 11.0.0 (compatible with GNU linkers)
-  - QEMU emulator version 5.2.0
+clangとLLD,Qemuに関してはManjaroLinuxで開発している関係上、バージョンが変わるかもしれません。
+- EDK2
+- clang version 11.0.0
+- LLD 11.0.0 (compatible with GNU linkers)
+- QEMU emulator version 5.2.0
 
 * 開発環境
-  toolディレクトリにedk2を追加する
-  #+BEGIN_SRC shell
-  git clone https://github.com/tianocore/edk2
-  #+END_SRC
-  クローンした後、セットアップとして以下のコマンドを実行します。（これは今後シェルスクリプトにする予定です）
-  #+BEGIN_SRC shell
-  git submodule update --init
-  make -C BaseTools/Source/C
-  #+END_SRC
+** EDK2のセットアップ
+toolディレクトリにedk2を追加する
+#+BEGIN_SRC shell
+git clone https://github.com/tianocore/edk2
+#+END_SRC
+クローンした後、セットアップとして以下のコマンドを実行します。（これは今後シェルスクリプトにする予定です）
+#+BEGIN_SRC shell
+git submodule update --init
+make -C BaseTools/Source/C
+#+END_SRC
+** OVMFのビルド
+EDK2の準備をする
+WcatOS/tool/edk2/内で以下のコマンドを実行する。
+#+begin_src bash
+source edksetup.sh
+#+end_src
 
-  その後、tool/Wcatboot_target内にあるtarget.txtをedk2/Confにコピペします。
-  そして、toolディレクトリ内にOVMF.fdを置き、WcatOSディレクトリ内で
-  #+BEGIN_SRC shell
-  make all
-  #+END_SRC
+その後OVMF用のtarget.txtをWcatOS/tool/edk2/Confにコピペする。
+#+begin_src bash
+cp ../../OVMF_target/target.txt ./
+#+end_src
 
-  とすれば実行できます。
-  
+そして、以下のコマンドでビルドをする
+#+begin_src bash
+build
+#+end_src
+
+すると、edk2/Build/OvmfX64/RELEASE_CLANG38/FVにOVMF.fdとして生成がされる。それをtool/内にコピペをする。
+
+
+** WcatOSのビルドの準備
+もし、edk2内でsource edkset.shを実行していなければ行う。
+
+tool/Wcatboot_target内にあるtarget.txtをedk2/Confにコピペする。
+#+begin_src bash
+cp ../../Wcatboot_target/target.txt ./
+#+end_src
+
+そして、WcatOSディレクトリ内で
+#+BEGIN_SRC shell
+make all
+#+END_SRC
+
+すれば実行が行われ、Qemuが起動します。
+
 * 参考文献
-  - [[https://github.com/uchan-nos/mikanos][MikanOS]]
-  - [[http://yuma.ohgami.jp/][大神　祐真さんの自作OS関連の資料]]
-  - [[https://github.com/Totsugekitai/minOS][minOS]]
+- [[https://github.com/uchan-nos/mikanos][MikanOS]]
+- [[http://yuma.ohgami.jp/][大神　祐真さんの自作OS関連の資料]]
+- [[https://github.com/Totsugekitai/minOS][minOS]]
 
 * ToDOリスト
-  - [ ] ASCIIコードの記号を追加実装
-  - [ ] GOPの情報を毎回引数で渡さなくて言いようにする
-  - [ ] print_string関数の実装
-  - [ ] source edksetup.shを自動化する
+- [ ] ASCIIコードの記号を追加実装
+- [ ] GOPの情報を毎回引数で渡さなくて言いようにする
+- [ ] print_string関数の実装
+- [ ] source edksetup.shを自動化する
 
-	
+
