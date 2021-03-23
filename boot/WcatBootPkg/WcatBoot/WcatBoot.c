@@ -36,7 +36,10 @@
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *SFSP;
 EFI_SYSTEM_TABLE *ST;
 
-
+/* 開発用フラグ（Stallを除外する） */
+/* 今後選択画面を実装し、そこで分岐を可能にする */
+#define DEVELOP
+/* ------------------------------------------------------------ */
 
 /* 追加 */
 /* ここはfile_infoを利用して動的に取得できるようにする */
@@ -209,7 +212,10 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
       break;
     }
   }
+
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
   /* rootディレクトリの情報を読み出している */
 
   /* 12_04 Loacteタイプ--------------------------------------------- */
@@ -231,7 +237,10 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   }
 
   /* SystemTable->BootServices->Stall(1000000); */
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
+  
   /* Rootでぃれくとりの表示 */
   Print(L"RootDirectory: ");
 
@@ -252,8 +261,12 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   }
 
   Print(L"\n");
-  
+
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
+
+  
   status_cheacker(SystemTable, status); /* statusチェック */
   Print(L"    Read status\n");
   if (EFI_ERROR(status)) {
@@ -261,9 +274,11 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   }
 
 
-  
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
 
+  
   /* 疑似シェルのlsコマンドとする場合等はCloseが必要となるが現状はファイル名を読み出したいだけであるためなし */
 
   /* Elfファイルの情報の抜き出しを行う */
@@ -279,15 +294,21 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
 
   Print(L"kernelfile is kernel.elf\n");
   status = root->Open(root, &kernel_file, L"\\kernel.elf", EFI_FILE_MODE_READ, 0); /* kernelのファイルを読み出す*/
-                      
+
+  #ifdef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
+  
   status_cheacker(SystemTable, status); /* statusチェック */
   Print(L"    kernelfile open\n");
   if (EFI_ERROR(status)) {
     hlt();
   }
 
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
+  
   VOID *kernel_buffer; /* kernelのバイナリ読み出し用 */
   UINTN kernel_file_info_size = sizeof(EFI_FILE_INFO) + sizeof(CHAR16) * 12;
   UINT8 kernel_file_info_buf[kernel_file_info_size];
@@ -302,14 +323,21 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   EFI_FILE_INFO *kerne_file_info = (EFI_FILE_INFO *)kernel_file_info_buf;
   UINTN kernel_file_size = kerne_file_info->FileSize;
 
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
+  
   status = gBS->AllocatePool(EfiLoaderData, kernel_file_size, (void **)&kernel_buffer);
   status_cheacker(SystemTable, status); /* statusチェック */
   Print(L"    AllocatePool\n");
   if (EFI_ERROR(status)) {
     hlt();
   }
+
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
+  
   status = kernel_file->Read(kernel_file, &kernel_file_size, kernel_buffer);
 
   status_cheacker(SystemTable, status); /* statusチェック */
@@ -318,30 +346,46 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     hlt();
   }
 
+
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
+  
   uint8_t *kernele_buf_test = (uint8_t *)kernel_buffer;
   int i;
   Print(L"Magic Number:");
   for (i = 0; i < 16; i++) {
+#ifndef DEVELOP
     SystemTable->BootServices->Stall(100000);
+#endif
     Print(L"%02x ", kernele_buf_test[i]);
   }
   Print(L"\n");
 
   /* アドレスの計算を行う */
   Elf64_Ehdr *kernel_ehdr = (Elf64_Ehdr *)kernel_buffer;
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
+  
   Print(L"entrypoint address:\t");
   Print(L"%08x\n", kernel_ehdr->e_entry);
 
   /* 以下にELF形式の */
   /* p_offsetを記載 */
+
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
+  
   Print(L"programheader offset:");
   Print(L"%08x\n", kernel_ehdr->e_phoff);
 
   /* プログラムヘッダーのエントリの数 */
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
+  
   Print(L"programheader number:");
   Print(L"%08x\n", kernel_ehdr->e_phnum);
 
@@ -355,7 +399,10 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   kernel_first_address = MAX_UINT64;
   kernel_last_address = 0;
 
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
+  
   Print(L"PT_LOAD: %d\n", PT_LOAD);
   
   for (uint16_t i = 0; i < kernel_ehdr->e_phnum; ++i) {
@@ -369,7 +416,10 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   /* 必要なページの計算 */
   UINTN num_pages = (kernel_last_address - kernel_first_address + 0xfff) / 0x1000;
 
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
+  
   Print(L"num pages: %d\n", num_pages);
  
   
@@ -401,9 +451,13 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     SetMem((VOID *)(phdr_copy_seg[i].p_vaddr + phdr_copy_seg[i].p_filesz), remain_byte, 0);
   }
 
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
   Print(L"kernel first address:\t\t%08x\n", kernel_first_address);
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
   Print(L"kernel last address:\t\t%08x\n", kernel_last_address);
 
 
@@ -414,7 +468,9 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   /* ===================================================================================== */
   /* カーネルの情報を読み出すために使用したメモリ上の一時領域を開放する */
   status = SystemTable->BootServices->FreePool(kernel_buffer);
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
   status_cheacker(SystemTable, status);
   Print(L"    free pool\n");
   if (EFI_ERROR(status)) {
@@ -441,7 +497,9 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
 														 &gop_handles);
   status_cheacker(SystemTable, status);
   Print(L"GOP LocateHandleBuffer\n");
+  #ifndef DEVELOP
   SystemTable->BootServices->Stall(500000);
+  #endif
 
 
 
@@ -494,7 +552,13 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
 
   if (map.buffer == NULL) {
     status = EFI_BUFFER_TOO_SMALL;
+
+    
+    #ifndef DEVELOP
     SystemTable->BootServices->Stall(500000);
+    #endif
+
+    
 	status_cheacker(SystemTable, status);
     Print(L"    GetMemoryMap\n");
     if (EFI_ERROR(status)) {
