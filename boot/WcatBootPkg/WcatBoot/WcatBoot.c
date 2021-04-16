@@ -199,6 +199,29 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   Print(L"                                                               \n");
   SystemTable->BootServices->Stall(100000);
 
+  SystemTable->ConOut->ClearScreen(SystemTable->ConOut);
+  Print(L"\n\n\n\n");
+  Print(L">   develop boot\n");
+  Print(L"    normal  boot\n");
+  SystemTable->BootServices->WaitForEvent(1, &(SystemTable->ConIn->WaitForKey),
+                                          &waitIndex); //入力があるまで待機
+
+  /* ここのメニュー設定はRegisterKeyNotify()を使ったほうが良さそう */
+  /* EFI_INPUT_KEY menu_key; */
+  /* while(1) { */
+  /*   SystemTable->ConIn->ReadKeyStroke(SystemTable->ConIn, &menu_key); */
+  /*   if (key.UnicodeChar == L'\r') { */
+  /*       SystemTable->ConOut->ClearScreen(SystemTable->ConOut); */
+  /*       Print(L"    develop boot\n"); */
+  /*       Print(L">   normal  boot\n"); */
+  /*       SystemTable->BootServices->WaitForEvent(1, &(SystemTable->ConIn->WaitForKey), */
+  /*                                         &waitIndex); //入力があるまで待機 */
+  /*   } else if (key.UnicodeChar == L'n') { */
+  /*       SystemTable->ConOut->ClearScreen(SystemTable->ConOut); */
+  /*       break; */
+  /*   } */
+  /* } */
+  
   /* カーネルブートするかのチェックを行う */
   Print(L"Kernel boot(press RET)\n");
   SystemTable->BootServices->WaitForEvent(1, &(SystemTable->ConIn->WaitForKey),
