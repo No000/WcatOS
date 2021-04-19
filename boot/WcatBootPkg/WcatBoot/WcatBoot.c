@@ -24,7 +24,6 @@
 #include  <Protocol/SimpleFileSystem.h>
 
 #include  <Protocol/SimpleTextOut.h> /* 追加(いらんかも？) */
-
 #include  <Protocol/DiskIo2.h>
 #include  <Protocol/BlockIo.h>
 #include  <Guid/FileInfo.h>
@@ -153,6 +152,19 @@ EFI_STATUS OpenRootDir(EFI_HANDLE image_handle, EFI_FILE_PROTOCOL **root) {
   return fs->OpenVolume(fs, root);
 }
 
+uint8_t is_exit = FALSE;
+/* EFI_HANDLE notifyHandle; */
+/* Regikeyのテスト用 */
+EFI_STATUS
+EFIAPI
+key_notise(IN EFI_KEY_DATA *KeyData){
+    Print(L"asdcacd\n");
+    is_exit = TRUE;
+    return EFI_SUCCESS;
+}
+
+
+
 EFI_STATUS
 EFIAPI
 UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
@@ -203,8 +215,53 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   Print(L"\n\n\n\n");
   Print(L">   develop boot\n");
   Print(L"    normal  boot\n");
-  SystemTable->BootServices->WaitForEvent(1, &(SystemTable->ConIn->WaitForKey),
-                                          &waitIndex); //入力があるまで待機
+
+    /* SystemTable->BootServices->WaitForEvent(1, &(SystemTable->ConIn->WaitForKey), */
+    /*                                       &waitIndex); //入力があるまで待機 */
+  Print(L"asdcasdc\n");
+
+  /* ここからRegisterKeyのテスト */
+
+  EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *SimpleEx;
+    Print(L"asdcasdc\n");
+  EFI_KEY_DATA regi_key_data1;
+  regi_key_data1.Key.UnicodeChar = 'q';
+  regi_key_data1.Key.ScanCode = 0;
+  regi_key_data1.KeyState.KeyShiftState = 0;
+  regi_key_data1.KeyState.KeyToggleState = 0;
+    Print(L"asdcasdc\n");
+
+  EFI_GUID  gEfiSimpleTextInputExProtocolGuid = EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL_GUID;
+  status = gBS->OpenProtocol(
+                             gST->ConsoleInHandle,
+                             &gEfiSimpleTextInputExProtocolGuid,
+                             (VOID**)&SimpleEx,
+                             gImageHandle,
+                             NULL,
+                             EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
+
+  	/* status = gBS->LocateProtocol( */
+	/* 		&gEfiSimpleTextInputExProtocolGuid, */
+	/* 		NULL, */
+	/* 		(VOID**)&SimpleEx */
+	/* 		); */
+  Print(L"%r\n",status);
+  if (EFI_ERROR(status)){
+      Print(L"%r",status);
+  }
+
+
+  
+  VOID *notify_handle;
+  status = SimpleEx->RegisterKeyNotify(SimpleEx, &regi_key_data1, key_notise, &notify_handle);
+  Print(L"%r\n", status);
+    if (EFI_ERROR(status)){
+      Print(L"Register key fail");
+  }
+    /* Print("%d",is_exit); */
+  while (!is_exit);
+  /* ここまでをテスト */
+  
 
   /* ここのメニュー設定はRegisterKeyNotify()を使ったほうが良さそう */
   /* EFI_INPUT_KEY menu_key; */
