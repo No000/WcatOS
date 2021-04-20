@@ -152,18 +152,43 @@ EFI_STATUS OpenRootDir(EFI_HANDLE image_handle, EFI_FILE_PROTOCOL **root) {
   return fs->OpenVolume(fs, root);
 }
 
-uint8_t is_exit = FALSE;
+BOOLEAN is_exit = FALSE;
 /* EFI_HANDLE notifyHandle; */
 /* Regikeyのテスト用 */
 EFI_STATUS
 EFIAPI
 key_notise(IN EFI_KEY_DATA *KeyData){
+    gST->ConOut->ClearScreen(gST->ConOut);
     Print(L"asdcacd\n");
     is_exit = TRUE;
     return EFI_SUCCESS;
 }
 
 
+/* キー入力があるまで待ち、キー入力があれば返す関数のテスト */
+EFI_INPUT_KEY efi_wait_any_key(){
+    EFI_INPUT_KEY retval = { 0, 0};
+    EFI_STATUS status;
+    EFI_EVENT timer_event;
+    EFI_EVENT events[2];
+    UINTN index = 0;
+    events[index++] = gST->ConIn->WaitForKey;
+
+    status = gBS->CreateEvent(EVT_TIMER, 0, NULL, NULL, &timer_event);
+    events[index++] = timer_event;
+
+    status = gBS->WaitForEvent(index, events, &index);
+    if(!EFI_ERROR((status))) {
+        if(index == 0) {
+            EFI_INPUT_KEY key;
+            status = gST->ConIn->ReadKeyStroke(gST->ConIn, &key);
+            if (!EFI_ERROR(status)) {
+                retval = key;
+            }
+        }
+    }
+    return  retval;
+}
 
 EFI_STATUS
 EFIAPI
@@ -216,20 +241,38 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   Print(L">   develop boot\n");
   Print(L"    normal  boot\n");
 
-    /* SystemTable->BootServices->WaitForEvent(1, &(SystemTable->ConIn->WaitForKey), */
-    /*                                       &waitIndex); //入力があるまで待機 */
-  Print(L"asdcasdc\n");
+  /* キー入力のテスト */
+  EFI_INPUT_KEY result_key_data = {0, 0};
+  for(;;) {
+      result_key_data = efi_wait_any_key();
+      if (result_key_data.ScanCode == 0x01) {
+        /* Print(L"up cursor\n"); */
+        gST->ConOut->ClearScreen(gST->ConOut);
+        Print(L"\n\n\n\n");
+        Print(L">   develop boot\n");
+        Print(L"    normal  boot\n");
+      } else if (result_key_data.ScanCode == 0x02) {
+        /* Print(L"down cursor\n"); */
+        gST->ConOut->ClearScreen(gST->ConOut);
+        Print(L"\n\n\n\n");
+        Print(L"    develop boot\n");
+        Print(L">   normal  boot\n");
+      }else
+      Print(L"%c", result_key_data.UnicodeChar);
+  }
+
+  
+    SystemTable->BootServices->WaitForEvent(1, &(SystemTable->ConIn->WaitForKey),
+                                          &waitIndex); //入力があるまで待機
 
   /* ここからRegisterKeyのテスト */
 
   EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *SimpleEx;
-    Print(L"asdcasdc\n");
   EFI_KEY_DATA regi_key_data1;
-  regi_key_data1.Key.UnicodeChar = 'q';
+  regi_key_data1.Key.UnicodeChar = '\r';
   regi_key_data1.Key.ScanCode = 0;
   regi_key_data1.KeyState.KeyShiftState = 0;
   regi_key_data1.KeyState.KeyToggleState = 0;
-    Print(L"asdcasdc\n");
 
   EFI_GUID  gEfiSimpleTextInputExProtocolGuid = EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL_GUID;
   status = gBS->OpenProtocol(
@@ -240,11 +283,6 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
                              NULL,
                              EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
 
-  	/* status = gBS->LocateProtocol( */
-	/* 		&gEfiSimpleTextInputExProtocolGuid, */
-	/* 		NULL, */
-	/* 		(VOID**)&SimpleEx */
-	/* 		); */
   Print(L"%r\n",status);
   if (EFI_ERROR(status)){
       Print(L"%r",status);
@@ -259,7 +297,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
       Print(L"Register key fail");
   }
     /* Print("%d",is_exit); */
-  while (!is_exit);
+  while (is_exit);
   /* ここまでをテスト */
   
 
