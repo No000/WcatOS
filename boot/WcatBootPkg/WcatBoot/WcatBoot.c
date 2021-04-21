@@ -237,7 +237,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   SystemTable->BootServices->Stall(100000);
 
   SystemTable->ConOut->ClearScreen(SystemTable->ConOut);
-  Print(L"\n\n\n\n");
+  /* Print(L"\n\n\n\n"); */
   Print(L">   develop boot\n");
   Print(L"    normal  boot\n");
 
@@ -247,16 +247,24 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
       result_key_data = efi_wait_any_key();
       if (result_key_data.ScanCode == 0x01) {
         /* Print(L"up cursor\n"); */
-        gST->ConOut->ClearScreen(gST->ConOut);
-        Print(L"\n\n\n\n");
-        Print(L">   develop boot\n");
-        Print(L"    normal  boot\n");
+        /* gST->ConOut->ClearScreen(gST->ConOut); */
+        gST->ConOut->SetCursorPosition(gST->ConOut, 0, 0); /* QueryMode()でカーソルの位置を指定するAPI */
+        Print(L">  ");
+        gST->ConOut->SetCursorPosition(gST->ConOut, 0, 1);
+        Print(L"   ");
+        /* Print(L"\n\n\n\n"); */
+        /* Print(L">   develop boot\n"); */
+        /* Print(L"    normal  boot\n"); */
       } else if (result_key_data.ScanCode == 0x02) {
         /* Print(L"down cursor\n"); */
-        gST->ConOut->ClearScreen(gST->ConOut);
-        Print(L"\n\n\n\n");
-        Print(L"    develop boot\n");
-        Print(L">   normal  boot\n");
+        /* gST->ConOut->ClearScreen(gST->ConOut); */
+        gST->ConOut->SetCursorPosition(gST->ConOut, 0, 1); /* QueryMode()でカーソルの位置を指定するAPI */
+        Print(L">  ");
+        gST->ConOut->SetCursorPosition(gST->ConOut, 0, 0);
+        Print(L"   ");
+        /* Print(L"\n\n\n\n"); */
+        /* Print(L"    develop boot\n"); */
+        /* Print(L">   normal  boot\n"); */
       }else
       Print(L"%c", result_key_data.UnicodeChar);
   }
