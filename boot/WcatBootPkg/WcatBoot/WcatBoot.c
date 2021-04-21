@@ -15,8 +15,8 @@
 
 
 #include  <Uefi.h>
-#include  <Library/UefiLib.h>
-#include  <Library/UefiBootServicesTableLib.h>
+#include  <Library/UefiLib.h>                  /* Print */
+#include  <Library/UefiBootServicesTableLib.h> /* gST */
 #include  <Library/PrintLib.h>
 #include  <Library/MemoryAllocationLib.h>
 #include  <Library/BaseMemoryLib.h>
@@ -211,64 +211,80 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   SystemTable->ConOut->ClearScreen(SystemTable->ConOut);
 
   /* ロゴの表示（エスケープシーケンスに注意） */
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 0); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L" __       __                        __       ______    ______  \n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 1); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"/  |  _  /  |                      /  |     /      \\  /      \\ \n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 2); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"$$ | / \\ $$ |  _______   ______   _$$ |_   /$$$$$$  |/$$$$$$  |\n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 3); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"$$ |/$  \\$$ | /       | /      \\ / $$   |  $$ |  $$ |$$ \\__$$/ \n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 4); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"$$ /$$$  $$ |/$$$$$$$/  $$$$$$  |$$$$$$/   $$ |  $$ |$$      \\ \n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 5); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"$$ $$/$$ $$ |$$ |       /    $$ |  $$ | __ $$ |  $$ | $$$$$$  |\n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 6); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"$$$$/  $$$$ |$$ \\_____ /$$$$$$$ |  $$ |/  |$$ \\__$$ |/  \\__$$ |\n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 7); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"$$$/    $$$ |$$       |$$    $$ |  $$  $$/ $$    $$/ $$    $$/ \n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 8); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"$$/      $$/  $$$$$$$/  $$$$$$$/    $$$$/   $$$$$$/   $$$$$$/  \n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 9); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"                                                               \n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 10); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"                                                               \n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 11); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"                                                               \n");
   SystemTable->BootServices->Stall(100000);
 
-  SystemTable->ConOut->ClearScreen(SystemTable->ConOut);
+
+  /* SystemTable->ConOut->ClearScreen(SystemTable->ConOut); */
   /* Print(L"\n\n\n\n"); */
-  Print(L">   develop boot\n");
-  Print(L"    normal  boot\n");
+  gST->ConOut->SetCursorPosition(gST->ConOut, 10, 15); /* QueryMode()でカーソルの位置を指定するAPI */
+  Print(L">    develop boot\n");
+  gST->ConOut->SetCursorPosition(gST->ConOut, 10, 16); /* QueryMode()でカーソルの位置を指定するAPI */
+  Print(L"     normal  boot\n");
 
   /* キー入力のテスト */
   EFI_INPUT_KEY result_key_data = {0, 0};
+  uint32_t boot_menu_index = 0;
   for(;;) {
-      result_key_data = efi_wait_any_key();
-      if (result_key_data.ScanCode == 0x01) {
-        /* Print(L"up cursor\n"); */
-        /* gST->ConOut->ClearScreen(gST->ConOut); */
-        gST->ConOut->SetCursorPosition(gST->ConOut, 0, 0); /* QueryMode()でカーソルの位置を指定するAPI */
-        Print(L">  ");
-        gST->ConOut->SetCursorPosition(gST->ConOut, 0, 1);
-        Print(L"   ");
-        /* Print(L"\n\n\n\n"); */
-        /* Print(L">   develop boot\n"); */
-        /* Print(L"    normal  boot\n"); */
-      } else if (result_key_data.ScanCode == 0x02) {
-        /* Print(L"down cursor\n"); */
-        /* gST->ConOut->ClearScreen(gST->ConOut); */
-        gST->ConOut->SetCursorPosition(gST->ConOut, 0, 1); /* QueryMode()でカーソルの位置を指定するAPI */
-        Print(L">  ");
-        gST->ConOut->SetCursorPosition(gST->ConOut, 0, 0);
-        Print(L"   ");
-        /* Print(L"\n\n\n\n"); */
-        /* Print(L"    develop boot\n"); */
-        /* Print(L">   normal  boot\n"); */
-      }else
-      Print(L"%c", result_key_data.UnicodeChar);
-  }
+        result_key_data = efi_wait_any_key();
+        if (result_key_data.ScanCode == 0x01 && boot_menu_index != 0) {
+            boot_menu_index--;
+        } else if (result_key_data.ScanCode == 0x02 && boot_menu_index != 1) { /* ここの１を増やせばメニューを増やせる */
+            boot_menu_index++;
+        }
 
+        /* case内のカーソルの位置とメニューの数を渡せば勝手に描画を行ってくれる関数を記載する */
+        switch (boot_menu_index) {
+        case 0:
+            gST->ConOut->SetCursorPosition(gST->ConOut, 10, 15); /* QueryMode()でカーソルの位置を指定するAPI */
+            Print(L">    ");
+            gST->ConOut->SetCursorPosition(gST->ConOut, 10, 16);
+            Print(L"     ");
+            break;
+        case 1:
+            gST->ConOut->SetCursorPosition(gST->ConOut, 10, 16); /* QueryMode()でカーソルの位置を指定するAPI */
+            Print(L">    ");
+            gST->ConOut->SetCursorPosition(gST->ConOut, 10, 15);
+            Print(L"     ");
+            boot_menu_index = 0;
+            break;
+        }
+  }
+  
   
     SystemTable->BootServices->WaitForEvent(1, &(SystemTable->ConIn->WaitForKey),
                                           &waitIndex); //入力があるまで待機
