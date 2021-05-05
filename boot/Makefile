@@ -17,5 +17,6 @@ ifeq ($(EDK_WORKSPACE),)
 	echo "$(error EDK PATH not set)"
 else
 	ln -sf $(ROOTDIR)/boot/WcatBootPkg $(EDK_WORKSPACE)
-	cd $(EDK_WORKSPACE); build
+	# cd $(EDK_WORKSPACE);
+	build -p WcatBootPkg/WcatBoot.dsc -b DEBUG -a X64 -t CLANG38
 endif
