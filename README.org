@@ -64,5 +64,6 @@ make all
 - [ ] GOPの情報を毎回引数で渡さなくて言いようにする
 - [ ] print_string関数の実装
 - [ ] source edksetup.shを自動化する
-
+- [ ] multibootの構造体のみがさぽーとされたもどきをつくる
+- [ ] 既存の処理しすてむはmikanos用に移動させる
 

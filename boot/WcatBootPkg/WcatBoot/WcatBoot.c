@@ -255,7 +255,13 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   Print(L">    develop boot\n");
   gST->ConOut->SetCursorPosition(gST->ConOut, 10, 16); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"     normal  boot\n");
+  
+  /* メモ */
+  /* artist-modeを用いて */
+  /* 肉球のロゴと、WcatOSのロゴをシンプルなものに書き換える */
+  /* PrintではなくSetCursorの座標を変更することで矢印の描画位置を変更するようにする。（もともとあった矢印も空白で上書きをしておく） */
 
+  
   /* キー入力のテスト */
   EFI_INPUT_KEY result_key_data = {0, 0};
   uint32_t boot_menu_index = 0;
