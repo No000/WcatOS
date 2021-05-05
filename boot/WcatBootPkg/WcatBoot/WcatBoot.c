@@ -262,9 +262,9 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   /* support UEFI */
   
   gST->ConOut->SetCursorPosition(gST->ConOut, 0, 13);
-  
+  Print(L"UEFI information \n");
   Print(L"UEFI Vendor information: %s\n", SystemTable->FirmwareVendor);
-  Print(L"UEFI Vendor version: %s\n", SystemTable->FirmwareRevision);
+  Print(L"UEFI Firmware version: 0x%x\n", SystemTable->FirmwareRevision);
   Print(L"Support UEFI Specification: ");
   switch (SystemTable->Hdr.Revision) {
       case EFI_2_70_SYSTEM_TABLE_REVISION:
@@ -276,9 +276,9 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   
   /* SystemTable->ConOut->ClearScreen(SystemTable->ConOut); */
   /* Print(L"\n\n\n\n"); */
-  gST->ConOut->SetCursorPosition(gST->ConOut, 10, 18); /* QueryMode()でカーソルの位置を指定するAPI */
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 18); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L">    develop boot\n");
-  gST->ConOut->SetCursorPosition(gST->ConOut, 10, 19); /* QueryMode()でカーソルの位置を指定するAPI */
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 19); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"     normal  boot\n");
   
   /* メモ */
@@ -306,17 +306,17 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
         /* case内のカーソルの位置とメニューの数を渡せば勝手に描画を行ってくれる関数を記載する */
         switch (boot_menu_index) {
         case 0:
-            gST->ConOut->SetCursorPosition(gST->ConOut, 10, 18); /* QueryMode()でカーソルの位置を指定するAPI */
+            gST->ConOut->SetCursorPosition(gST->ConOut, 0, 18); /* QueryMode()でカーソルの位置を指定するAPI */
             Print(L">    ");
-            gST->ConOut->SetCursorPosition(gST->ConOut, 10, 19);
+            gST->ConOut->SetCursorPosition(gST->ConOut, 0, 19);
             Print(L"     ");
             stall_flag = 0;
             /* boot_menu_index = 1 */;
             break;
         case 1:
-            gST->ConOut->SetCursorPosition(gST->ConOut, 10, 19); /* QueryMode()でカーソルの位置を指定するAPI */
+            gST->ConOut->SetCursorPosition(gST->ConOut, 0, 19); /* QueryMode()でカーソルの位置を指定するAPI */
             Print(L">    ");
-            gST->ConOut->SetCursorPosition(gST->ConOut, 10, 18);
+            gST->ConOut->SetCursorPosition(gST->ConOut, 0, 18);
             Print(L"     ");
             stall_flag = 1;
             /* boot_menu_index = 0; */
