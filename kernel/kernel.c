@@ -1,3 +1,14 @@
+/**
+ * @file   kernel.c
+ * @author toto <toto@toto-vm-development>
+ * @date   Tue Feb  2 00:36:02 2021
+ * 
+ * @brief  WcatOSのカーネル
+ * 
+ * 
+ */
+
+
 #include <stdint.h>
 #include "graphic.h"
 #include "font.h"
@@ -35,13 +46,13 @@ uint32_t cursor_x = 0;
 uint32_t cursor_y = 0;
 
 
-void print_char(char c, VIDEO_INFO video_info) {
+void print_char(char c, VIDEO_INFO video_info, color pixel_color) {
   int x = 0, y = 0;
   /* 実験なのでインデックスは0固定 */
   for (y = 0; y < FONT_HEIGHT; y++) {
     for (x = 0; x < FONT_WIDTH; x++) {
       if (font_bitmap[(uint32_t)c][y][x])
-        drow_pixel(cursor_x + x, cursor_y + y, BLACK, video_info);
+        drow_pixel(cursor_x + x, cursor_y + y, pixel_color, video_info);
     }
   }
   cursor_x += FONT_WIDTH;
@@ -54,10 +65,10 @@ void print_char(char c, VIDEO_INFO video_info) {
   }
 }
 
-void print_string(char *string, VIDEO_INFO vudeo_info) {
+void print_string(char *string, VIDEO_INFO vudeo_info, color pixel_color) {
   int i = 0;
   while (string[i] != '\0') {
-	print_char(string[i], vudeo_info);
+	print_char(string[i], vudeo_info, pixel_color);
 	i++;
   }
 }
@@ -90,7 +101,7 @@ void kernel_main(VIDEO_INFO *video_infomation) {
   /* print_char('A', *video_infomation); */
 
 
-  print_string("!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", *video_infomation);
+  print_string("!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", *video_infomation, BLACK);
  
   while (1)
     hlt();

@@ -15,8 +15,8 @@
 
 
 #include  <Uefi.h>
-#include  <Library/UefiLib.h>
-#include  <Library/UefiBootServicesTableLib.h>
+#include  <Library/UefiLib.h>                  /* Print */
+#include  <Library/UefiBootServicesTableLib.h> /* gST */
 #include  <Library/PrintLib.h>
 #include  <Library/MemoryAllocationLib.h>
 #include  <Library/BaseMemoryLib.h>
@@ -24,7 +24,6 @@
 #include  <Protocol/SimpleFileSystem.h>
 
 #include  <Protocol/SimpleTextOut.h> /* 追加(いらんかも？) */
-
 #include  <Protocol/DiskIo2.h>
 #include  <Protocol/BlockIo.h>
 #include  <Guid/FileInfo.h>
@@ -36,7 +35,10 @@
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *SFSP;
 EFI_SYSTEM_TABLE *ST;
 
-
+/* 開発用フラグ（Stallを除外する） */
+/* 今後選択画面を実装し、そこで分岐を可能にする */
+#define DEVELOP
+/* ------------------------------------------------------------ */
 
 /* 追加 */
 /* ここはfile_infoを利用して動的に取得できるようにする */
@@ -150,6 +152,52 @@ EFI_STATUS OpenRootDir(EFI_HANDLE image_handle, EFI_FILE_PROTOCOL **root) {
   return fs->OpenVolume(fs, root);
 }
 
+BOOLEAN is_exit = FALSE;
+/* EFI_HANDLE notifyHandle; */
+/* Regikeyのテスト用 */
+EFI_STATUS
+EFIAPI
+key_notise(IN EFI_KEY_DATA *KeyData){
+    gST->ConOut->ClearScreen(gST->ConOut);
+    Print(L"asdcacd\n");
+    is_exit = TRUE;
+    return EFI_SUCCESS;
+}
+
+
+/* キー入力があるまで待ち、キー入力があれば返す関数のテスト */
+EFI_INPUT_KEY efi_wait_any_key(){
+    EFI_INPUT_KEY retval = { 0, 0};
+    EFI_STATUS status;
+    EFI_EVENT timer_event;
+    EFI_EVENT events[2];
+    UINTN index = 0;
+    events[index++] = gST->ConIn->WaitForKey;
+
+    status = gBS->CreateEvent(EVT_TIMER, 0, NULL, NULL, &timer_event);
+    events[index++] = timer_event;
+
+    status = gBS->WaitForEvent(index, events, &index);
+    if(!EFI_ERROR((status))) {
+        if(index == 0) {
+            EFI_INPUT_KEY key;
+            status = gST->ConIn->ReadKeyStroke(gST->ConIn, &key);
+            if (!EFI_ERROR(status)) {
+                retval = key;
+            }
+        }
+    }
+    return  retval;
+}
+
+/* フラグでStallを分岐する関数 */
+/* statusチェックで動かない際の動作がめんどくさいので後回し */
+void stall_branch(uint32_t boot_menu_index){
+    if (boot_menu_index == 1){
+        gST->BootServices->Stall(500000);
+    }
+}
+
 EFI_STATUS
 EFIAPI
 UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
@@ -160,8 +208,8 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   EFI_FILE_INFO *file_info;
   struct FILE file_list[10];
   int index = 0;
-  EFI_INPUT_KEY key;
-  UINTN waitIndex;
+  /* EFI_INPUT_KEY key; */
+  /* UINTN waitIndex; */
 
   /* watchdogタイマの無効化 */
   /* 5分刻みで再起動してしまうのを防ぐ。 */
@@ -171,45 +219,189 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   SystemTable->ConOut->ClearScreen(SystemTable->ConOut);
 
   /* ロゴの表示（エスケープシーケンスに注意） */
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 0); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L" __       __                        __       ______    ______  \n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 1); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"/  |  _  /  |                      /  |     /      \\  /      \\ \n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 2); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"$$ | / \\ $$ |  _______   ______   _$$ |_   /$$$$$$  |/$$$$$$  |\n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 3); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"$$ |/$  \\$$ | /       | /      \\ / $$   |  $$ |  $$ |$$ \\__$$/ \n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 4); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"$$ /$$$  $$ |/$$$$$$$/  $$$$$$  |$$$$$$/   $$ |  $$ |$$      \\ \n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 5); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"$$ $$/$$ $$ |$$ |       /    $$ |  $$ | __ $$ |  $$ | $$$$$$  |\n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 6); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"$$$$/  $$$$ |$$ \\_____ /$$$$$$$ |  $$ |/  |$$ \\__$$ |/  \\__$$ |\n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 7); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"$$$/    $$$ |$$       |$$    $$ |  $$  $$/ $$    $$/ $$    $$/ \n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 8); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"$$/      $$/  $$$$$$$/  $$$$$$$/    $$$$/   $$$$$$/   $$$$$$/  \n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 9); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"                                                               \n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 10); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"                                                               \n");
   SystemTable->BootServices->Stall(100000);
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 11); /* QueryMode()でカーソルの位置を指定するAPI */
   Print(L"                                                               \n");
   SystemTable->BootServices->Stall(100000);
 
-  /* カーネルブートするかのチェックを行う */
-  Print(L"Kernel boot(press RET)\n");
-  SystemTable->BootServices->WaitForEvent(1, &(SystemTable->ConIn->WaitForKey),
-                                          &waitIndex); //入力があるまで待機
-
-  /* RETキーが押されると進む */
-  while (1) {
-    SystemTable->ConIn->ReadKeyStroke(SystemTable->ConIn, &key);
-    if (key.UnicodeChar != '\r') {
-      Print(L"KernelBoot Start\n");
-      break;
-    }
+  /* ベンダー情報を記載 */
+  /* FirmWare vendor情報 */
+  /* Firmware バージョン情報 */
+  /* support UEFI */
+  
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 13);
+  Print(L"UEFI information \n");
+  Print(L"UEFI Vendor information: %s\n", SystemTable->FirmwareVendor);
+  Print(L"UEFI Firmware version: 0x%x\n", SystemTable->FirmwareRevision);
+  Print(L"Support UEFI Specification: ");
+  switch (SystemTable->Hdr.Revision) {
+      case EFI_2_70_SYSTEM_TABLE_REVISION:
+          Print(L"UEFI 2.70 supported\n");
   }
-  SystemTable->BootServices->Stall(500000);
+
+  
+  
+  
+  /* SystemTable->ConOut->ClearScreen(SystemTable->ConOut); */
+  /* Print(L"\n\n\n\n"); */
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 18); /* QueryMode()でカーソルの位置を指定するAPI */
+  Print(L">    develop boot\n");
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 19); /* QueryMode()でカーソルの位置を指定するAPI */
+  Print(L"     normal  boot\n");
+  
+  /* メモ */
+  /* artist-modeを用いて */
+  /* 肉球のロゴと、WcatOSのロゴをシンプルなものに書き換える */
+  /* PrintではなくSetCursorの座標を変更することで矢印の描画位置を変更するようにする。（もともとあった矢印も空白で上書きをしておく） */
+
+
+  /* Stall用のフラグ */
+  /* uint32_t boot_menu_index = 1; */
+  
+  /* キー入力のテスト */
+  EFI_INPUT_KEY result_key_data = {0, 0};
+  uint32_t boot_menu_index = 0;
+  uint32_t stall_flag = 0;
+
+  for(;;) {
+        result_key_data = efi_wait_any_key();
+        if (result_key_data.ScanCode == 0x01 && boot_menu_index != 0) {
+            boot_menu_index--;
+        } else if (result_key_data.ScanCode == 0x02 && boot_menu_index != 1) { /* ここの１を増やせばメニューを増やせる */
+            boot_menu_index++;
+        } 
+
+        /* case内のカーソルの位置とメニューの数を渡せば勝手に描画を行ってくれる関数を記載する */
+        switch (boot_menu_index) {
+        case 0:
+            gST->ConOut->SetCursorPosition(gST->ConOut, 0, 18); /* QueryMode()でカーソルの位置を指定するAPI */
+            Print(L">    ");
+            gST->ConOut->SetCursorPosition(gST->ConOut, 0, 19);
+            Print(L"     ");
+            stall_flag = 0;
+            /* boot_menu_index = 1 */;
+            break;
+        case 1:
+            gST->ConOut->SetCursorPosition(gST->ConOut, 0, 19); /* QueryMode()でカーソルの位置を指定するAPI */
+            Print(L">    ");
+            gST->ConOut->SetCursorPosition(gST->ConOut, 0, 18);
+            Print(L"     ");
+            stall_flag = 1;
+            /* boot_menu_index = 0; */
+            /* boot_menu_index = 0; */
+            break;
+        }
+        if (result_key_data.UnicodeChar == '\r'){
+            break;
+        }
+
+  }
+  
+  
+    /* SystemTable->BootServices->WaitForEvent(1, &(SystemTable->ConIn->WaitForKey), */
+    /*                                       &waitIndex); //入力があるまで待機 */
+
+  /* ここからRegisterKeyのテスト */
+
+  /* EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *SimpleEx; */
+  /* EFI_KEY_DATA regi_key_data1; */
+  /* regi_key_data1.Key.UnicodeChar = '\r'; */
+  /* regi_key_data1.Key.ScanCode = 0; */
+  /* regi_key_data1.KeyState.KeyShiftState = 0; */
+  /* regi_key_data1.KeyState.KeyToggleState = 0; */
+
+  /* EFI_GUID  gEfiSimpleTextInputExProtocolGuid = EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL_GUID; */
+  /* status = gBS->OpenProtocol( */
+  /*                            gST->ConsoleInHandle, */
+  /*                            &gEfiSimpleTextInputExProtocolGuid, */
+  /*                            (VOID**)&SimpleEx, */
+  /*                            gImageHandle, */
+  /*                            NULL, */
+  /*                            EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL); */
+
+  /* Print(L"%r\n",status); */
+  /* if (EFI_ERROR(status)){ */
+  /*     Print(L"%r",status); */
+  /* } */
+
+
+  
+  /* VOID *notify_handle; */
+  /* status = SimpleEx->RegisterKeyNotify(SimpleEx, &regi_key_data1, key_notise, &notify_handle); */
+  /* Print(L"%r\n", status); */
+  /*   if (EFI_ERROR(status)){ */
+  /*     Print(L"Register key fail"); */
+  /* } */
+  /*   /\* Print("%d",is_exit); *\/ */
+  /* while (is_exit); */
+  /* ここまでをテスト */
+  
+
+  /* ここのメニュー設定はRegisterKeyNotify()を使ったほうが良さそう */
+  /* EFI_INPUT_KEY menu_key; */
+  /* while(1) { */
+  /*   SystemTable->ConIn->ReadKeyStroke(SystemTable->ConIn, &menu_key); */
+  /*   if (key.UnicodeChar == L'\r') { */
+  /*       SystemTable->ConOut->ClearScreen(SystemTable->ConOut); */
+  /*       Print(L"    develop boot\n"); */
+  /*       Print(L">   normal  boot\n"); */
+  /*       SystemTable->BootServices->WaitForEvent(1, &(SystemTable->ConIn->WaitForKey), */
+  /*                                         &waitIndex); //入力があるまで待機 */
+  /*   } else if (key.UnicodeChar == L'n') { */
+  /*       SystemTable->ConOut->ClearScreen(SystemTable->ConOut); */
+  /*       break; */
+  /*   } */
+  /* } */
+  
+  /* カーネルブートするかのチェックを行う */
+  /* Print(L"Kernel boot(press RET)\n"); */
+  /* SystemTable->BootServices->WaitForEvent(1, &(SystemTable->ConIn->WaitForKey), */
+  /*                                         &waitIndex); //入力があるまで待機 */
+
+  /* /\* RETキーが押されると進む *\/ */
+  /* while (1) { */
+  /*   SystemTable->ConIn->ReadKeyStroke(SystemTable->ConIn, &key); */
+  /*   if (key.UnicodeChar != '\r') { */
+  /*     Print(L"KernelBoot Start\n"); */
+  /*     break; */
+  /*   } */
+  /* } */
+
+
+  SystemTable->ConOut->ClearScreen(SystemTable->ConOut);
+  stall_branch(stall_flag);
   /* rootディレクトリの情報を読み出している */
 
   /* 12_04 Loacteタイプ--------------------------------------------- */
@@ -231,7 +423,8 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   }
 
   /* SystemTable->BootServices->Stall(1000000); */
-  SystemTable->BootServices->Stall(500000);
+  stall_branch(stall_flag);
+  
   /* Rootでぃれくとりの表示 */
   Print(L"RootDirectory: ");
 
@@ -252,18 +445,19 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   }
 
   Print(L"\n");
+
+  stall_branch(stall_flag);
+
   
-  SystemTable->BootServices->Stall(500000);
   status_cheacker(SystemTable, status); /* statusチェック */
   Print(L"    Read status\n");
   if (EFI_ERROR(status)) {
     hlt();
   }
 
+  stall_branch(stall_flag);
 
   
-  SystemTable->BootServices->Stall(500000);
-
   /* 疑似シェルのlsコマンドとする場合等はCloseが必要となるが現状はファイル名を読み出したいだけであるためなし */
 
   /* Elfファイルの情報の抜き出しを行う */
@@ -279,15 +473,17 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
 
   Print(L"kernelfile is kernel.elf\n");
   status = root->Open(root, &kernel_file, L"\\kernel.elf", EFI_FILE_MODE_READ, 0); /* kernelのファイルを読み出す*/
-                      
-  SystemTable->BootServices->Stall(500000);
+
+  stall_branch(stall_flag);
+  
   status_cheacker(SystemTable, status); /* statusチェック */
   Print(L"    kernelfile open\n");
   if (EFI_ERROR(status)) {
     hlt();
   }
 
-  SystemTable->BootServices->Stall(500000);
+  stall_branch(stall_flag);
+  
   VOID *kernel_buffer; /* kernelのバイナリ読み出し用 */
   UINTN kernel_file_info_size = sizeof(EFI_FILE_INFO) + sizeof(CHAR16) * 12;
   UINT8 kernel_file_info_buf[kernel_file_info_size];
@@ -302,14 +498,17 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   EFI_FILE_INFO *kerne_file_info = (EFI_FILE_INFO *)kernel_file_info_buf;
   UINTN kernel_file_size = kerne_file_info->FileSize;
 
-  SystemTable->BootServices->Stall(500000);
+  stall_branch(stall_flag);
+  
   status = gBS->AllocatePool(EfiLoaderData, kernel_file_size, (void **)&kernel_buffer);
   status_cheacker(SystemTable, status); /* statusチェック */
   Print(L"    AllocatePool\n");
   if (EFI_ERROR(status)) {
     hlt();
   }
-  SystemTable->BootServices->Stall(500000);
+
+  stall_branch(stall_flag);
+  
   status = kernel_file->Read(kernel_file, &kernel_file_size, kernel_buffer);
 
   status_cheacker(SystemTable, status); /* statusチェック */
@@ -318,30 +517,39 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     hlt();
   }
 
-  SystemTable->BootServices->Stall(500000);
+
+  stall_branch(stall_flag);
+  
   uint8_t *kernele_buf_test = (uint8_t *)kernel_buffer;
   int i;
   Print(L"Magic Number:");
   for (i = 0; i < 16; i++) {
+#ifndef DEVELOP
     SystemTable->BootServices->Stall(100000);
+#endif
     Print(L"%02x ", kernele_buf_test[i]);
   }
   Print(L"\n");
 
   /* アドレスの計算を行う */
   Elf64_Ehdr *kernel_ehdr = (Elf64_Ehdr *)kernel_buffer;
-  SystemTable->BootServices->Stall(500000);
+  stall_branch(stall_flag);
+  
   Print(L"entrypoint address:\t");
   Print(L"%08x\n", kernel_ehdr->e_entry);
 
   /* 以下にELF形式の */
   /* p_offsetを記載 */
-  SystemTable->BootServices->Stall(500000);
+  
+  stall_branch(stall_flag);
+  
+  
   Print(L"programheader offset:");
   Print(L"%08x\n", kernel_ehdr->e_phoff);
 
   /* プログラムヘッダーのエントリの数 */
-  SystemTable->BootServices->Stall(500000);
+  stall_branch(stall_flag);
+  
   Print(L"programheader number:");
   Print(L"%08x\n", kernel_ehdr->e_phnum);
 
@@ -355,7 +563,8 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   kernel_first_address = MAX_UINT64;
   kernel_last_address = 0;
 
-  SystemTable->BootServices->Stall(500000);
+  stall_branch(stall_flag);
+  
   Print(L"PT_LOAD: %d\n", PT_LOAD);
   
   for (uint16_t i = 0; i < kernel_ehdr->e_phnum; ++i) {
@@ -369,7 +578,8 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   /* 必要なページの計算 */
   UINTN num_pages = (kernel_last_address - kernel_first_address + 0xfff) / 0x1000;
 
-  SystemTable->BootServices->Stall(500000);
+  stall_branch(stall_flag);
+  
   Print(L"num pages: %d\n", num_pages);
  
   
@@ -401,9 +611,9 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     SetMem((VOID *)(phdr_copy_seg[i].p_vaddr + phdr_copy_seg[i].p_filesz), remain_byte, 0);
   }
 
-  SystemTable->BootServices->Stall(500000);
+  stall_branch(stall_flag);
   Print(L"kernel first address:\t\t%08x\n", kernel_first_address);
-  SystemTable->BootServices->Stall(500000);
+  stall_branch(stall_flag);
   Print(L"kernel last address:\t\t%08x\n", kernel_last_address);
 
 
@@ -414,7 +624,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   /* ===================================================================================== */
   /* カーネルの情報を読み出すために使用したメモリ上の一時領域を開放する */
   status = SystemTable->BootServices->FreePool(kernel_buffer);
-  SystemTable->BootServices->Stall(500000);
+  stall_branch(stall_flag);
   status_cheacker(SystemTable, status);
   Print(L"    free pool\n");
   if (EFI_ERROR(status)) {
@@ -441,7 +651,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
 														 &gop_handles);
   status_cheacker(SystemTable, status);
   Print(L"GOP LocateHandleBuffer\n");
-  SystemTable->BootServices->Stall(500000);
+  stall_branch(stall_flag);
 
 
 
@@ -494,7 +704,11 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
 
   if (map.buffer == NULL) {
     status = EFI_BUFFER_TOO_SMALL;
-    SystemTable->BootServices->Stall(500000);
+
+    
+    stall_branch(stall_flag);
+
+    
 	status_cheacker(SystemTable, status);
     Print(L"    GetMemoryMap\n");
     if (EFI_ERROR(status)) {
