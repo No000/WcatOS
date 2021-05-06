@@ -6,16 +6,16 @@
 
 # target.txtを動的にリンクするようにする
 
+SHELL = /bin/bash
+
 .PHONY: default clean
 
 ROOTDIR = $(CURDIR)/..
-EDK_WORKSPACE = $(WORKSPACE)
+EDK_WORKSPACE = $(ROOTDIR)/tool/edk2
 
 default:
 	echo $(EDK_WORKSPACE)
-ifeq ($(EDK_WORKSPACE),)
-	echo "$(error EDK PATH not set)"
-else
 	ln -sf $(ROOTDIR)/boot/WcatBootPkg $(EDK_WORKSPACE)
-	cd $(EDK_WORKSPACE); build
-endif
+	cd ${EDK_WORKSPACE}; source edksetup.sh --reconfig;\
+	build -p WcatBootPkg/WcatBoot.dsc -b RELEASE -a X64 -t CLANG38
+

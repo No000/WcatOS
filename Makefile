@@ -12,7 +12,7 @@ default:
 
 boot:
 	$(MAKE) -C boot
-	cp $(WORKSPACE)/Build/WcatBoot/RELEASE_CLANG38/X64/WcatBootPkg/WcatBoot/WcatBoot/OUTPUT/WcatBoot.efi ./test/EFI/BOOT/BOOTX64.EFI
+	cp $(CURDIR)/tool/edk2/Build/WcatBoot/RELEASE_CLANG38/X64/WcatBootPkg/WcatBoot/WcatBoot/OUTPUT/WcatBoot.efi ./test/EFI/BOOT/BOOTX64.EFI
 	
 
 kernel:

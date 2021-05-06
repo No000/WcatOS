@@ -60,10 +60,11 @@ make all
 - [[https://github.com/Totsugekitai/minOS][minOS]]
 
 * ToDOリスト
-- [ ] ASCIIコードの記号を追加実装
-- [ ] GOPの情報を毎回引数で渡さなくて言いようにする
-- [ ] print_string関数の実装
-- [ ] source edksetup.shを自動化する
-- [ ] multibootの構造体のみがさぽーとされたもどきをつくる
-- [ ] 既存の処理しすてむはmikanos用に移動させる
+- [ ] ASCIIコードの記号を追加実装。
+- [ ] GOPの情報を毎回引数で渡さなくて言いようにする。(gSTの使用)
+- [ ] print_string関数の実装。
+- [X] source edksetup.shを自動化する。 (https://github.com/No000/WcatOS/issues/10)
+- [ ] OVMFのビルドと配置を自動化する。
+- [ ] multiboot2の構造体のみを参考にし、カーネルに渡す情報を整理する。
+- [ ] 既存の処理しすてむはmikanos用に移動させる。
 
