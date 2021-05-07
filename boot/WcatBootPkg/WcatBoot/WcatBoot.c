@@ -35,9 +35,6 @@
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *SFSP;
 EFI_SYSTEM_TABLE *ST;
 
-/* 開発用フラグ（Stallを除外する） */
-/* 今後選択画面を実装し、そこで分岐を可能にする */
-#define DEVELOP
 /* ------------------------------------------------------------ */
 
 /* 追加 */
@@ -561,9 +558,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   int i;
   Print(L"Magic Number:");
   for (i = 0; i < 16; i++) {
-#ifndef DEVELOP
-    SystemTable->BootServices->Stall(100000);
-#endif
+    stall_branch(stall_flag);
     Print(L"%02x ", kernele_buf_test[i]);
   }
   Print(L"\n");
@@ -572,7 +567,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   Elf64_Ehdr *kernel_ehdr = (Elf64_Ehdr *)kernel_buffer;
   stall_branch(stall_flag);
   
-  Print(L"entrypoint address:\t");
+  Print(L"entrypoint address: ");
   Print(L"%08x\n", kernel_ehdr->e_entry);
 
   /* 以下にELF形式の */
@@ -649,9 +644,9 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   }
 
   stall_branch(stall_flag);
-  Print(L"kernel first address:\t\t%08x\n", kernel_first_address);
+  Print(L"kernel first address:  %08x\n", kernel_first_address);
   stall_branch(stall_flag);
-  Print(L"kernel last address:\t\t%08x\n", kernel_last_address);
+  Print(L"kernel last address:  %08x\n", kernel_last_address);
 
 
 
