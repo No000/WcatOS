@@ -203,7 +203,7 @@ void stall_branch(uint32_t boot_menu_index){
 /* }; */
 
 /* SMBIOSアクセステストの関数 */
-void *find_efi_acpi_table(void) {
+void *find_efi_smbios_table(void) {
     EFI_GUID efi_smbios_table = SMBIOS_TABLE_GUID;
   /* const EFI_GUID efi_smbios = SMBIOS_TABLE_GUID; */
   unsigned long long i;
@@ -289,7 +289,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   /* support UEFI */
 
   gST->ConOut->SetCursorPosition(gST->ConOut, 0, 12);
-  char *s = find_efi_acpi_table();
+  char *s = find_efi_smbios_table();
   Print(L"%c",s[0]); /* ’R’ */
   Print(L"%c",s[1]); /* ’R’ */
   Print(L"%c",s[2]); /* ’R’ */
