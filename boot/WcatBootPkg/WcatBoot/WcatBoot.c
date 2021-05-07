@@ -23,7 +23,8 @@
 #include  <Protocol/LoadedImage.h>
 #include  <Protocol/SimpleFileSystem.h>
 
-#include  <Protocol/SimpleTextOut.h> /* 追加(いらんかも？) */
+#include <Protocol/SimpleTextOut.h> /* 追加(いらんかも？) */
+#include <Guid/SmBios.h>            /* SMBIOS */
 #include  <Protocol/DiskIo2.h>
 #include  <Protocol/BlockIo.h>
 #include  <Guid/FileInfo.h>
@@ -194,6 +195,35 @@ void stall_branch(uint32_t boot_menu_index){
         gST->BootServices->Stall(500000);
     }
 }
+/* struct EFI_GUID { */
+/* 	unsigned int Data1; */
+/* 	unsigned short Data2; */
+/* 	unsigned short Data3; */
+/* 	unsigned char Data4[8]; */
+/* }; */
+
+/* SMBIOSアクセステストの関数 */
+void *find_efi_acpi_table(void) {
+    EFI_GUID efi_smbios_table = SMBIOS_TABLE_GUID;
+  /* const EFI_GUID efi_smbios = SMBIOS_TABLE_GUID; */
+  unsigned long long i;
+  for (i = 0; i < ST->NumberOfTableEntries; i++) {
+    EFI_GUID *guid = &gST->ConfigurationTable[i].VendorGuid;
+    if ((guid->Data1 == efi_smbios_table.Data1) &&
+        (guid->Data2 == efi_smbios_table.Data2) &&
+        (guid->Data3 == efi_smbios_table.Data3)) {
+      unsigned char is_equal = TRUE;
+      unsigned char j;
+      for (j = 0; j < 8; j++) {
+        if (guid->Data4[j] != efi_smbios_table.Data4[j])
+          is_equal = FALSE;
+      }
+      if (is_equal == TRUE)
+        return gST->ConfigurationTable[i].VendorTable;
+    }
+  }
+  return NULL;
+}
 
 EFI_STATUS
 EFIAPI
@@ -257,7 +287,15 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   /* FirmWare vendor情報 */
   /* Firmware バージョン情報 */
   /* support UEFI */
-  
+
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 12);
+  char *s = find_efi_acpi_table();
+  Print(L"%c",s[0]); /* ’R’ */
+  Print(L"%c",s[1]); /* ’R’ */
+  Print(L"%c",s[2]); /* ’R’ */
+  Print(L"%c",s[3]); /* ’R’ */
+
+
   gST->ConOut->SetCursorPosition(gST->ConOut, 0, 13);
   Print(L"UEFI information \n");
   Print(L"UEFI Vendor information: %s\n", SystemTable->FirmwareVendor);
