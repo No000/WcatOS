@@ -21,7 +21,7 @@ kernel:
 
 run:
 	$(QEMU) \
-		-m 512 -serial mon:stdio -d cpu_reset -bios tool/OVMF.fd -hda fat:rw:test
+		-m 512 -serial mon:stdio -d cpu_reset -bios tool/OVMF.fd -hda fat:rw:test -smbios type=0,vendor=tototo,version=1.2.3
 
 all:
 	make boot

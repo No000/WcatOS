@@ -25,6 +25,7 @@
 
 #include <Protocol/SimpleTextOut.h> /* 追加(いらんかも？) */
 #include <Guid/SmBios.h>            /* SMBIOS */
+#include <IndustryStandard/SmBios.h>
 #include  <Protocol/DiskIo2.h>
 #include  <Protocol/BlockIo.h>
 #include  <Guid/FileInfo.h>
@@ -35,7 +36,6 @@
 
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *SFSP;
 EFI_SYSTEM_TABLE *ST;
-
 /* ------------------------------------------------------------ */
 
 /* 追加 */
@@ -167,16 +167,24 @@ key_notise(IN EFI_KEY_DATA *KeyData){
 EFI_INPUT_KEY efi_wait_any_key(){
     EFI_INPUT_KEY retval = { 0, 0};
     EFI_STATUS status;
-    EFI_EVENT timer_event;
-    EFI_EVENT events[2];
+    /* EFI_EVENT timer_event; */
+    /* EFI_EVENT events[1]; */
     UINTN index = 0;
-    events[index++] = gST->ConIn->WaitForKey;
+    /* events[index++] = gST->ConIn->WaitForKey; */
 
-    status = gBS->CreateEvent(EVT_TIMER, 0, NULL, NULL, &timer_event);
-    events[index++] = timer_event;
+    /* status = gBS->CreateEvent(EVT_TIMER, 0, NULL, NULL, &timer_event); */
+    /* events[index++] = timer_event; */
 
-    status = gBS->WaitForEvent(index, events, &index);
-    if(!EFI_ERROR((status))) {
+    status = gBS->WaitForEvent(1, &(gST->ConIn->WaitForKey), &index);
+    while (1) {
+        if (!EFI_ERROR(status)){
+            break;
+        } else {
+            __asm__("hlt");
+        }
+    }
+    
+    if(!EFI_ERROR(status)) {
         if(index == 0) {
             EFI_INPUT_KEY key;
             status = gST->ConIn->ReadKeyStroke(gST->ConIn, &key);
@@ -184,6 +192,8 @@ EFI_INPUT_KEY efi_wait_any_key(){
                 retval = key;
             }
         }
+    } else {
+        Print(L"waitforevent error\n");
     }
     return  retval;
 }
@@ -195,12 +205,31 @@ void stall_branch(uint32_t boot_menu_index){
         gST->BootServices->Stall(500000);
     }
 }
-/* struct EFI_GUID { */
-/* 	unsigned int Data1; */
-/* 	unsigned short Data2; */
-/* 	unsigned short Data3; */
-/* 	unsigned char Data4[8]; */
-/* }; */
+
+
+/* #pragma pack(1) */
+/* /\* SMBIOSのテスト用 *\/ */
+
+/* typedef UINT8 SMBIOS_STRING; */
+
+/* typedef struct { */
+/*   UINT8   AnchorString[4]; */
+/*   UINT8   EntryPointStructureChecksum; */
+/*   UINT8   EntryPointLength; */
+/*   UINT8   MajorVersion; */
+/*   UINT8   MinorVersion; */
+/*   UINT16  MaxStructureSize; */
+/*   UINT8   EntryPointRevision; */
+/*   UINT8   FormattedArea[5]; */
+/*   UINT8   IntermediateAnchorString[5]; */
+/*   UINT8   IntermediateChecksum; */
+/*   UINT16  TableLength; */
+/*   UINT32  TableAddress; */
+/*   UINT16  NumberOfSmbiosStructures; */
+/*   UINT8   SmbiosBcdRevision; */
+/* } SMBIOS_STRUCTURE_TABLE; */
+
+/* #pragma pack(0) */
 
 /* SMBIOSアクセステストの関数 */
 void *find_efi_smbios_table(void) {
@@ -225,6 +254,122 @@ void *find_efi_smbios_table(void) {
   return NULL;
 }
 
+CHAR8 *
+LibGetSmbiosString (
+  IN  SMBIOS_STRUCTURE_POINTER    *Smbios,
+  IN  UINT16                      StringNumber
+  )
+/*++
+Routine Description:
+  Return SMBIOS string given the string number.
+  Arguments:
+      Smbios       - Pointer to SMBIOS structure
+      StringNumber - String number to return. -1 is used to skip all strings and 
+                     point to the next SMBIOS structure.
+  Returns:
+      Pointer to string, or pointer to next SMBIOS strcuture if StringNumber == -1
+--*/
+{
+  UINT16  Index;
+  CHAR8   *String;
+ 
+
+  //
+  // Skip over formatted section
+  //
+  String = (CHAR8 *) (Smbios->Raw + Smbios->Hdr->Length);
+
+  //
+  // Look through unformated section
+  //
+  for (Index = 1; Index <= StringNumber; Index++) {
+    if (StringNumber == Index) {
+      return String;
+    }
+    //
+    // Skip string
+    //
+    for (; *String != 0; String++);
+    String++;
+
+    if (*String == 0) {
+      //
+      // If double NULL then we are done.
+      //  Retrun pointer to next structure in Smbios.
+      //  if you pass in a -1 you will always get here
+      //
+      Smbios->Raw = (UINT8 *)++String;
+      return NULL;
+    }
+  }
+
+  return NULL;
+}
+
+/* https://github.com/tianocore/edk-Shell/blob/36dd4fd6e13abf56ceaf9f8c42c46ec8cef3949e/Library/Misc.c */
+/* よりテストとして移植 */
+STATIC CHAR8  Hex[] = {
+  '0',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  'A',
+  'B',
+  'C',
+  'D',
+  'E',
+  'F'
+};
+VOID
+DumpHex (
+  IN UINTN        Indent,
+  IN UINTN        Offset,
+  IN UINTN        DataSize,
+  IN VOID         *UserData
+  )
+{
+  UINT8 *Data;
+
+  CHAR8 Val[50];
+
+  CHAR8 Str[20];
+
+  UINT8 c;
+  UINTN Size;
+  UINTN Index;
+  
+
+  Data = UserData;
+  while (DataSize) {
+    Size = 16;
+    if (Size > DataSize) {
+      Size = DataSize;
+    }
+
+    for (Index = 0; Index < Size; Index += 1) {
+      c                   = Data[Index];
+      Val[Index * 3 + 0]  = Hex[c >> 4];
+      Val[Index * 3 + 1]  = Hex[c & 0xF];
+      Val[Index * 3 + 2]  = (CHAR8) ((Index == 7) ? '-' : ' ');
+      Str[Index]          = (CHAR8) ((c < ' ' || c > 'z') ? '.' : c);
+    }
+
+    Val[Index * 3]  = 0;
+    Str[Index]      = 0;
+    Print (L"%*a%X: %-.48a *%a*\n", Indent, "", Offset, Val, Str);
+
+    Data += Size;
+    Offset += Size;
+    DataSize -= Size;
+  }
+}
+/* 以上SMBIOSのテスト */
 EFI_STATUS
 EFIAPI
 UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
@@ -287,13 +432,44 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   /* FirmWare vendor情報 */
   /* Firmware バージョン情報 */
   /* support UEFI */
-
+  /* メモリ情報を読み出し、バッファを構造体に割りあてる */
   gST->ConOut->SetCursorPosition(gST->ConOut, 0, 12);
-  char *s = find_efi_smbios_table();
-  Print(L"%c",s[0]); /* ’R’ */
-  Print(L"%c",s[1]); /* ’R’ */
-  Print(L"%c",s[2]); /* ’R’ */
-  Print(L"%c",s[3]); /* ’R’ */
+  SMBIOS_TABLE_ENTRY_POINT *smtable;
+  smtable = find_efi_smbios_table();
+  Print(L"%c", smtable->AnchorString[2]);
+  SMBIOS_STRUCTURE_POINTER Smbios_struct;
+  SMBIOS_STRUCTURE_POINTER SMbios_endstrruct;
+  Smbios_struct.Hdr = (SMBIOS_STRUCTURE *)((UINTN)(smtable->TableAddress));
+  Print(L"%x", smtable->TableLength);
+  /* UINT8 Buffer[1024]; */
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 13); */
+  
+  SMbios_endstrruct.Raw = (UINT8 *)((UINTN)(smtable->TableAddress + smtable->TableLength));
+  IN EFI_GUID *SystemGuidTest = NULL;
+  Print(L"=");
+  /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
+  AsciiPrint(LibGetSmbiosString(&Smbios_struct, Smbios_struct.Type0->Vendor));
+  AsciiPrint(LibGetSmbiosString(&Smbios_struct, Smbios_struct.Type0->BiosVersion));
+  
+  
+  Print(L"=");
+  /* CopyMem(SystemGuidTest, &Smbios_struct.Type1->Uuid, sizeof(EFI_GUID)); */
+  
+  Print(L"%c", smtable->IntermediateAnchorString[0]);
+  Print(L"%c", smtable->IntermediateAnchorString[1]);
+  Print(L"%x", smtable->MajorVersion);
+  Print(L"%x", smtable->MinorVersion);
+  Print(L"  ");
+  Print(L"%x", smtable->NumberOfSmbiosStructures);
+  Print(L"%x", SystemGuidTest);
+
+
+  /* char *s = find_efi_smbios_table(); */
+  
+  /* Print(L"%c",s[0]); /\* ’R’ *\/ */
+  /* Print(L"%c",s[1]); /\* ’R’ *\/ */
+  /* Print(L"%c",s[2]); /\* ’R’ *\/ */
+  /* Print(L"%c",s[3]); /\* ’R’ *\/ */
 
 
   gST->ConOut->SetCursorPosition(gST->ConOut, 0, 13);
