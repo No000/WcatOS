@@ -306,69 +306,7 @@ Routine Description:
   return NULL;
 }
 
-/* https://github.com/tianocore/edk-Shell/blob/36dd4fd6e13abf56ceaf9f8c42c46ec8cef3949e/Library/Misc.c */
-/* よりテストとして移植 */
-STATIC CHAR8  Hex[] = {
-  '0',
-  '1',
-  '2',
-  '3',
-  '4',
-  '5',
-  '6',
-  '7',
-  '8',
-  '9',
-  'A',
-  'B',
-  'C',
-  'D',
-  'E',
-  'F'
-};
-VOID
-DumpHex (
-  IN UINTN        Indent,
-  IN UINTN        Offset,
-  IN UINTN        DataSize,
-  IN VOID         *UserData
-  )
-{
-  UINT8 *Data;
 
-  CHAR8 Val[50];
-
-  CHAR8 Str[20];
-
-  UINT8 c;
-  UINTN Size;
-  UINTN Index;
-  
-
-  Data = UserData;
-  while (DataSize) {
-    Size = 16;
-    if (Size > DataSize) {
-      Size = DataSize;
-    }
-
-    for (Index = 0; Index < Size; Index += 1) {
-      c                   = Data[Index];
-      Val[Index * 3 + 0]  = Hex[c >> 4];
-      Val[Index * 3 + 1]  = Hex[c & 0xF];
-      Val[Index * 3 + 2]  = (CHAR8) ((Index == 7) ? '-' : ' ');
-      Str[Index]          = (CHAR8) ((c < ' ' || c > 'z') ? '.' : c);
-    }
-
-    Val[Index * 3]  = 0;
-    Str[Index]      = 0;
-    Print (L"%*a%X: %-.48a *%a*\n", Indent, "", Offset, Val, Str);
-
-    Data += Size;
-    Offset += Size;
-    DataSize -= Size;
-  }
-}
 /* 以上SMBIOSのテスト */
 EFI_STATUS
 EFIAPI
@@ -440,6 +378,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   SMBIOS_STRUCTURE_POINTER Smbios_struct;
   SMBIOS_STRUCTURE_POINTER SMbios_endstrruct;
   Smbios_struct.Hdr = (SMBIOS_STRUCTURE *)((UINTN)(smtable->TableAddress));
+  /* Smbios_struct.Raw = (UINT8 *)(UINTN)(smtable->TableAddress); */
   Print(L"%x", smtable->TableLength);
   /* UINT8 Buffer[1024]; */
   /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 13); */
@@ -447,10 +386,40 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   SMbios_endstrruct.Raw = (UINT8 *)((UINTN)(smtable->TableAddress + smtable->TableLength));
   IN EFI_GUID *SystemGuidTest = NULL;
   Print(L"=");
+  Print(L"%d.%d", smtable->MajorVersion, smtable->MinorVersion);
+  Print(L"=");
+  Print(L"%d", smtable->NumberOfSmbiosStructures);  
+  Print(L"=");
+  /* 以下の関数を呼ぶたびにテーブルが一つ進む */
+  int smbios_count;
+  for (smbios_count = 0; smbios_count < smtable->NumberOfSmbiosStructures; smbios_count++){
+      /* Print(L"%d", Smbios_struct.Hdr->Type); */
+      /* Print(L"*"); */
+      if (Smbios_struct.Hdr->Type == 1) {
+          /* Print(L"hello"); */
+          AsciiPrint(LibGetSmbiosString(&Smbios_struct, Smbios_struct.Type1->Family));
+          break;
+      } else {
+          LibGetSmbiosString(&Smbios_struct, (UINT16) (-1));
+      }
+  }
   /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
-  AsciiPrint(LibGetSmbiosString(&Smbios_struct, Smbios_struct.Type0->Vendor));
-  AsciiPrint(LibGetSmbiosString(&Smbios_struct, Smbios_struct.Type0->BiosVersion));
-  
+  /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
+  /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
+  /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
+  /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
+  /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
+  /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
+  /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
+  /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
+  /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
+  Print(L"%x", Smbios_struct.Hdr->Type);
+  Print(L"=");
+  /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
+  /* AsciiPrint(LibGetSmbiosString(&Smbios_struct, Smbios_struct.Type4->ProcessorManufacturer)); */
+  /* Print(L"%s", LibGetSmbiosString(&Smbios_struct, Smbios_struct.Type1->Family)); */
+  /* Print(L"%s", Smbios_struct.Type1->Family); */
+  /* AsciiPrint(LibGetSmbiosString(&Smbios_struct, Smbios_struct.Type0->BiosVersion)); */
   
   Print(L"=");
   /* CopyMem(SystemGuidTest, &Smbios_struct.Type1->Uuid, sizeof(EFI_GUID)); */
@@ -464,8 +433,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   Print(L"%x", SystemGuidTest);
 
 
-  /* char *s = find_efi_smbios_table(); */
-  
+  /* char *s = find_efi_smbios_table(); */  
   /* Print(L"%c",s[0]); /\* ’R’ *\/ */
   /* Print(L"%c",s[1]); /\* ’R’ *\/ */
   /* Print(L"%c",s[2]); /\* ’R’ *\/ */
