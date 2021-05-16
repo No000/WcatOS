@@ -1,13 +1,9 @@
-#include <Uefi.h>
+#include  <Uefi.h>
 #include  <Library/UefiBootServicesTableLib.h> /* gST */
-#include <Guid/SmBios.h>                       /* SMBIOS */
-#include <IndustryStandard/SmBios.h>
+#include  <Guid/SmBios.h>                       /* SMBIOS */
+#include  <IndustryStandard/SmBios.h>
 #include  <Library/UefiBootServicesTableLib.h> /* gST */
 
-
-/* EFI_STATUS smbios_next_table_move(IN SMBIOS_STRUCTURE_POINTER *Smbios); */
-/* CHAR8 *get_smbios_string(IN SMBIOS_STRUCTURE_POINTER *Smbios, */
-/*                          IN UINT16 StructureMember); */
 
 
 EFI_STATUS smbios_next_table_move(IN SMBIOS_STRUCTURE_POINTER *Smbios){
