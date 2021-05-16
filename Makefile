@@ -8,7 +8,7 @@
 .PHONY: boot kernel run
 QEMU = qemu-system-x86_64
 
-default:
+# default:
 
 boot:
 	$(MAKE) -C boot
