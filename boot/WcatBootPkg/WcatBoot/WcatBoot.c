@@ -29,7 +29,8 @@
 #include  <Protocol/DiskIo2.h>
 #include  <Protocol/BlockIo.h>
 #include  <Guid/FileInfo.h>
-#include  <stdint.h>
+#include <stdint.h>
+#include "smbios.h"
 
 #include "elf_header.h"
 /* ELFヘッダーは */
@@ -206,106 +207,28 @@ void stall_branch(uint32_t boot_menu_index){
     }
 }
 
-
-/* #pragma pack(1) */
-/* /\* SMBIOSのテスト用 *\/ */
-
-/* typedef UINT8 SMBIOS_STRING; */
-
-/* typedef struct { */
-/*   UINT8   AnchorString[4]; */
-/*   UINT8   EntryPointStructureChecksum; */
-/*   UINT8   EntryPointLength; */
-/*   UINT8   MajorVersion; */
-/*   UINT8   MinorVersion; */
-/*   UINT16  MaxStructureSize; */
-/*   UINT8   EntryPointRevision; */
-/*   UINT8   FormattedArea[5]; */
-/*   UINT8   IntermediateAnchorString[5]; */
-/*   UINT8   IntermediateChecksum; */
-/*   UINT16  TableLength; */
-/*   UINT32  TableAddress; */
-/*   UINT16  NumberOfSmbiosStructures; */
-/*   UINT8   SmbiosBcdRevision; */
-/* } SMBIOS_STRUCTURE_TABLE; */
-
-/* #pragma pack(0) */
-
-/* SMBIOSアクセステストの関数 */
-void *find_efi_smbios_table(void) {
-    EFI_GUID efi_smbios_table = SMBIOS_TABLE_GUID;
-  /* const EFI_GUID efi_smbios = SMBIOS_TABLE_GUID; */
-  unsigned long long i;
-  for (i = 0; i < ST->NumberOfTableEntries; i++) {
-    EFI_GUID *guid = &gST->ConfigurationTable[i].VendorGuid;
-    if ((guid->Data1 == efi_smbios_table.Data1) &&
-        (guid->Data2 == efi_smbios_table.Data2) &&
-        (guid->Data3 == efi_smbios_table.Data3)) {
-      unsigned char is_equal = TRUE;
-      unsigned char j;
-      for (j = 0; j < 8; j++) {
-        if (guid->Data4[j] != efi_smbios_table.Data4[j])
-          is_equal = FALSE;
-      }
-      if (is_equal == TRUE)
-        return gST->ConfigurationTable[i].VendorTable;
-    }
-  }
-  return NULL;
-}
-
-CHAR8 *
-LibGetSmbiosString (
-  IN  SMBIOS_STRUCTURE_POINTER    *Smbios,
-  IN  UINT16                      StringNumber
-  )
-/*++
-Routine Description:
-  Return SMBIOS string given the string number.
-  Arguments:
-      Smbios       - Pointer to SMBIOS structure
-      StringNumber - String number to return. -1 is used to skip all strings and 
-                     point to the next SMBIOS structure.
-  Returns:
-      Pointer to string, or pointer to next SMBIOS strcuture if StringNumber == -1
---*/
-{
-  UINT16  Index;
-  CHAR8   *String;
- 
-
-  //
-  // Skip over formatted section
-  //
-  String = (CHAR8 *) (Smbios->Raw + Smbios->Hdr->Length);
-
-  //
-  // Look through unformated section
-  //
-  for (Index = 1; Index <= StringNumber; Index++) {
-    if (StringNumber == Index) {
-      return String;
-    }
-    //
-    // Skip string
-    //
-    for (; *String != 0; String++);
-    String++;
-
-    if (*String == 0) {
-      //
-      // If double NULL then we are done.
-      //  Retrun pointer to next structure in Smbios.
-      //  if you pass in a -1 you will always get here
-      //
-      Smbios->Raw = (UINT8 *)++String;
-      return NULL;
-    }
-  }
-
-  return NULL;
-}
-
+/* /\* SMBIOSアクセステストの関数 *\/ */
+/* void *find_efi_smbios_table(void) { */
+/*     EFI_GUID efi_smbios_table = SMBIOS_TABLE_GUID; */
+/*   /\* const EFI_GUID efi_smbios = SMBIOS_TABLE_GUID; *\/ */
+/*   unsigned long long i; */
+/*   for (i = 0; i < ST->NumberOfTableEntries; i++) { */
+/*     EFI_GUID *guid = &gST->ConfigurationTable[i].VendorGuid; */
+/*     if ((guid->Data1 == efi_smbios_table.Data1) && */
+/*         (guid->Data2 == efi_smbios_table.Data2) && */
+/*         (guid->Data3 == efi_smbios_table.Data3)) { */
+/*       unsigned char is_equal = TRUE; */
+/*       unsigned char j; */
+/*       for (j = 0; j < 8; j++) { */
+/*         if (guid->Data4[j] != efi_smbios_table.Data4[j]) */
+/*           is_equal = FALSE; */
+/*       } */
+/*       if (is_equal == TRUE) */
+/*         return gST->ConfigurationTable[i].VendorTable; */
+/*     } */
+/*   } */
+/*   return NULL; */
+/* } */
 
 /* 以上SMBIOSのテスト */
 EFI_STATUS
@@ -376,19 +299,19 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   smtable = find_efi_smbios_table();
   Print(L"%c", smtable->AnchorString[2]);
   SMBIOS_STRUCTURE_POINTER Smbios_struct;
-  SMBIOS_STRUCTURE_POINTER SMbios_endstrruct;
+  /* SMBIOS_STRUCTURE_POINTER SMbios_endstrruct; */
   Smbios_struct.Hdr = (SMBIOS_STRUCTURE *)((UINTN)(smtable->TableAddress));
   /* Smbios_struct.Raw = (UINT8 *)(UINTN)(smtable->TableAddress); */
   Print(L"%x", smtable->TableLength);
   /* UINT8 Buffer[1024]; */
   /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 13); */
   
-  SMbios_endstrruct.Raw = (UINT8 *)((UINTN)(smtable->TableAddress + smtable->TableLength));
+  /* SMbios_endstrruct.Raw = (UINT8 *)((UINTN)(smtable->TableAddress + smtable->TableLength)); */
   IN EFI_GUID *SystemGuidTest = NULL;
   Print(L"=");
   Print(L"%d.%d", smtable->MajorVersion, smtable->MinorVersion);
   Print(L"=");
-  Print(L"%d", smtable->NumberOfSmbiosStructures);  
+  Print(L"%d", Smbios_struct.Type1->WakeUpType);  
   Print(L"=");
   /* 以下の関数を呼ぶたびにテーブルが一つ進む */
   int smbios_count;
@@ -397,10 +320,12 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
       /* Print(L"*"); */
       if (Smbios_struct.Hdr->Type == 1) {
           /* Print(L"hello"); */
-          AsciiPrint(LibGetSmbiosString(&Smbios_struct, Smbios_struct.Type1->Family));
+          /* AsciiPrint(LibGetSmbiosString(&Smbios_struct, Smbios_struct.Type1->Family)); */
+                    AsciiPrint(get_smbios_string(&Smbios_struct, Smbios_struct.Type1->Family));
           break;
       } else {
-          LibGetSmbiosString(&Smbios_struct, (UINT16) (-1));
+          /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
+          smbios_next_table_move(&Smbios_struct);
       }
   }
   /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
@@ -413,7 +338,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
   /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
   /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
-  Print(L"%x", Smbios_struct.Hdr->Type);
+  /* Print(L"%x", Smbios_struct.Hdr->Type); */
   Print(L"=");
   /* LibGetSmbiosString(&Smbios_struct, (UINT16) (-1)); */
   /* AsciiPrint(LibGetSmbiosString(&Smbios_struct, Smbios_struct.Type4->ProcessorManufacturer)); */
