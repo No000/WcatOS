@@ -23,14 +23,14 @@
 #include  <Protocol/LoadedImage.h>
 #include  <Protocol/SimpleFileSystem.h>
 
-#include <Protocol/SimpleTextOut.h> /* 追加(いらんかも？) */
-#include <Guid/SmBios.h>            /* SMBIOS */
-#include <IndustryStandard/SmBios.h>
+#include  <Protocol/SimpleTextOut.h> /* 追加(いらんかも？) */
+#include  <Guid/SmBios.h>            /* SMBIOS */
+#include  <IndustryStandard/SmBios.h>
 #include  <Protocol/DiskIo2.h>
 #include  <Protocol/BlockIo.h>
 #include  <Guid/FileInfo.h>
-#include <stdint.h>
-#include "smbios.h"
+#include  <stdint.h>
+#include  "smbios.h"
 
 #include "elf_header.h"
 /* ELFヘッダーは */
