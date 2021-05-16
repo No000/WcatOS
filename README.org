@@ -40,19 +40,11 @@ build
 
 
 ** WcatOSのビルドの準備
-もし、edk2内でsource edkset.shを実行していなければ行う。
-
-tool/Wcatboot_target内にあるtarget.txtをedk2/Confにコピペする。
-#+begin_src bash
-cp ../../Wcatboot_target/target.txt ./
-#+end_src
-
-そして、WcatOSディレクトリ内で
+WcatOSディレクトリ内で
 #+BEGIN_SRC shell
 make all
 #+END_SRC
-
-すれば実行が行われ、Qemuが起動します。
+すればビルドと実行が行われ、Qemuが起動します。
 
 * 参考文献
 - [[https://github.com/uchan-nos/mikanos][MikanOS]]
