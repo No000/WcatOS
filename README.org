@@ -20,24 +20,11 @@ git submodule update --init
 make -C BaseTools/Source/C
 #+END_SRC
 ** OVMFのビルド
-EDK2の準備をする
-WcatOS/tool/edk2/内で以下のコマンドを実行する。
+WcatOSディレクトリ内で
 #+begin_src bash
-source edksetup.sh
+make setup
 #+end_src
-
-その後OVMF用のtarget.txtをWcatOS/tool/edk2/Confにコピペする。
-#+begin_src bash
-cp ../../OVMF_target/target.txt ./
-#+end_src
-
-そして、以下のコマンドでビルドをする
-#+begin_src bash
-build
-#+end_src
-
-すると、edk2/Build/OvmfX64/RELEASE_CLANG38/FVにOVMF.fdとして生成がされる。それをtool/内にコピペをする。
-
+ビルドが完了すれば、WcatOS/tool/OVMF/に生成されている。
 
 ** WcatOSのビルドの準備
 WcatOSディレクトリ内で
@@ -56,7 +43,7 @@ make all
 - [ ] GOPの情報を毎回引数で渡さなくて言いようにする。(gSTの使用)
 - [ ] print_string関数の実装。
 - [X] source edksetup.shを自動化する。 (https://github.com/No000/WcatOS/issues/10)
-- [ ] OVMFのビルドと配置を自動化する。
+- [X] OVMFのビルドと配置を自動化する。
 - [ ] multiboot2の構造体のみを参考にし、カーネルに渡す情報を整理する。
 - [ ] 既存の処理しすてむはmikanos用に移動させる。
 
