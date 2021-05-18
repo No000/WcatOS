@@ -17,6 +17,7 @@
 [LibraryClasses]
   UefiLib
   UefiApplicationEntryPoint
+  RegisterFilterLib
 
 [Guids]
   gEfiFileInfoGuid
