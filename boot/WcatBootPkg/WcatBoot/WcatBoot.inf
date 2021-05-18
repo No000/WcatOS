@@ -8,6 +8,8 @@
 
 [Sources]
   WcatBoot.c
+  smbios.c
+  menu.c
 
 [Packages]
   MdePkg/MdePkg.dec

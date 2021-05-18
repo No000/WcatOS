@@ -5,10 +5,17 @@
 # Totsugekitaiさんのをベースにカスタム
 # https://github.com/Totsugekitai/minOSv2/blob/master/Makefile
 
-.PHONY: boot kernel run
-QEMU = qemu-system-x86_64
+.PHONY: boot kernel run tool
 
-default:
+SHELL = /bin/bash
+QEMU = qemu-system-x86_64
+OVMF = /tool/OVMF/OVMF.fd
+
+ROOTDIR = $(CURDIR)
+OVMF = $(ROOTDIR)/tool/OVMF/OVMF.fd
+EDK_WORKSPACE = $(ROOTDIR)/tool/edk2
+
+# default:
 
 boot:
 	$(MAKE) -C boot
@@ -21,7 +28,17 @@ kernel:
 
 run:
 	$(QEMU) \
-		-m 512 -serial mon:stdio -d cpu_reset -bios tool/OVMF.fd -hda fat:rw:test
+		-m 512 -serial mon:stdio -d cpu_reset -bios $(OVMF) -hda fat:rw:test -smbios type=1,family=tetoto
+
+tool:
+	cd ${EDK_WORKSPACE}; source edksetup.sh --reconfig;\
+	build -p OvmfPkg/OvmfPkgX64.dsc -b RELEASE -a X64 -t CLANG38
+	cp $(CURDIR)/tool/edk2/Build/OvmfX64/RELEASE_CLANG38/FV/OVMF.fd ./tool/OVMF/
+	cp $(CURDIR)/tool/edk2/Build/OvmfX64/RELEASE_CLANG38/FV/OVMF_CODE.fd ./tool/OVMF/
+	cp $(CURDIR)/tool/edk2/Build/OvmfX64/RELEASE_CLANG38/FV/OVMF_VARS.fd ./tool/OVMF/
+
+setup:
+	make tool
 
 all:
 	make boot

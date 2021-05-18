@@ -24,20 +24,20 @@
 #include  <Protocol/SimpleFileSystem.h>
 
 #include  <Protocol/SimpleTextOut.h> /* 追加(いらんかも？) */
+#include  <Guid/SmBios.h>            /* SMBIOS */
+#include  <IndustryStandard/SmBios.h>
 #include  <Protocol/DiskIo2.h>
 #include  <Protocol/BlockIo.h>
 #include  <Guid/FileInfo.h>
 #include  <stdint.h>
+#include "smbios.h"
+#include "menu.h"
 
 #include "elf_header.h"
 /* ELFヘッダーは */
 
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *SFSP;
 EFI_SYSTEM_TABLE *ST;
-
-/* 開発用フラグ（Stallを除外する） */
-/* 今後選択画面を実装し、そこで分岐を可能にする */
-#define DEVELOP
 /* ------------------------------------------------------------ */
 
 /* 追加 */
@@ -166,29 +166,39 @@ key_notise(IN EFI_KEY_DATA *KeyData){
 
 
 /* キー入力があるまで待ち、キー入力があれば返す関数のテスト */
-EFI_INPUT_KEY efi_wait_any_key(){
-    EFI_INPUT_KEY retval = { 0, 0};
-    EFI_STATUS status;
-    EFI_EVENT timer_event;
-    EFI_EVENT events[2];
-    UINTN index = 0;
-    events[index++] = gST->ConIn->WaitForKey;
+/* EFI_INPUT_KEY efi_wait_any_key(){ */
+/*     EFI_INPUT_KEY retval = { 0, 0}; */
+/*     EFI_STATUS status; */
+/*     /\* EFI_EVENT timer_event; *\/ */
+/*     /\* EFI_EVENT events[1]; *\/ */
+/*     UINTN index = 0; */
+/*     /\* events[index++] = gST->ConIn->WaitForKey; *\/ */
 
-    status = gBS->CreateEvent(EVT_TIMER, 0, NULL, NULL, &timer_event);
-    events[index++] = timer_event;
+/*     /\* status = gBS->CreateEvent(EVT_TIMER, 0, NULL, NULL, &timer_event); *\/ */
+/*     /\* events[index++] = timer_event; *\/ */
 
-    status = gBS->WaitForEvent(index, events, &index);
-    if(!EFI_ERROR((status))) {
-        if(index == 0) {
-            EFI_INPUT_KEY key;
-            status = gST->ConIn->ReadKeyStroke(gST->ConIn, &key);
-            if (!EFI_ERROR(status)) {
-                retval = key;
-            }
-        }
-    }
-    return  retval;
-}
+/*     status = gBS->WaitForEvent(1, &(gST->ConIn->WaitForKey), &index); */
+/*     while (1) { */
+/*         if (!EFI_ERROR(status)){ */
+/*             break; */
+/*         } else { */
+/*             __asm__("hlt"); */
+/*         } */
+/*     } */
+    
+/*     if(!EFI_ERROR(status)) { */
+/*         if(index == 0) { */
+/*             EFI_INPUT_KEY key; */
+/*             status = gST->ConIn->ReadKeyStroke(gST->ConIn, &key); */
+/*             if (!EFI_ERROR(status)) { */
+/*                 retval = key; */
+/*             } */
+/*         } */
+/*     } else { */
+/*         Print(L"waitforevent error\n"); */
+/*     } */
+/*     return  retval; */
+/* } */
 
 /* フラグでStallを分岐する関数 */
 /* statusチェックで動かない際の動作がめんどくさいので後回し */
@@ -208,126 +218,126 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   EFI_FILE_INFO *file_info;
   struct FILE file_list[10];
   int index = 0;
-  /* EFI_INPUT_KEY key; */
-  /* UINTN waitIndex; */
 
   /* watchdogタイマの無効化 */
   /* 5分刻みで再起動してしまうのを防ぐ。 */
   SystemTable->BootServices->SetWatchdogTimer(0, 0, 0, NULL);
 
-  /* 画面クリアを行う */
-  SystemTable->ConOut->ClearScreen(SystemTable->ConOut);
-
-  /* ロゴの表示（エスケープシーケンスに注意） */
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 0); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L" __       __                        __       ______    ______  \n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 1); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"/  |  _  /  |                      /  |     /      \\  /      \\ \n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 2); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"$$ | / \\ $$ |  _______   ______   _$$ |_   /$$$$$$  |/$$$$$$  |\n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 3); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"$$ |/$  \\$$ | /       | /      \\ / $$   |  $$ |  $$ |$$ \\__$$/ \n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 4); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"$$ /$$$  $$ |/$$$$$$$/  $$$$$$  |$$$$$$/   $$ |  $$ |$$      \\ \n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 5); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"$$ $$/$$ $$ |$$ |       /    $$ |  $$ | __ $$ |  $$ | $$$$$$  |\n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 6); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"$$$$/  $$$$ |$$ \\_____ /$$$$$$$ |  $$ |/  |$$ \\__$$ |/  \\__$$ |\n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 7); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"$$$/    $$$ |$$       |$$    $$ |  $$  $$/ $$    $$/ $$    $$/ \n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 8); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"$$/      $$/  $$$$$$$/  $$$$$$$/    $$$$/   $$$$$$/   $$$$$$/  \n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 9); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"                                                               \n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 10); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"                                                               \n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 11); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"                                                               \n");
-  SystemTable->BootServices->Stall(100000);
 
   /* ベンダー情報を記載 */
   /* FirmWare vendor情報 */
   /* Firmware バージョン情報 */
   /* support UEFI */
+  /* メモリ情報を読み出し、バッファを構造体に割りあてる */
+  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 12);
+  SMBIOS_TABLE_ENTRY_POINT *smtable;
+  smtable = find_efi_smbios_table();
+  Print(L"%c", smtable->AnchorString[2]);
+  SMBIOS_STRUCTURE_POINTER Smbios_struct;
+
+  Smbios_struct.Hdr = (SMBIOS_STRUCTURE *)((UINTN)(smtable->TableAddress));
+
+  Print(L"%x", smtable->TableLength);
+
+  IN EFI_GUID *SystemGuidTest = NULL;
+  Print(L"=");
+  Print(L"%d.%d", smtable->MajorVersion, smtable->MinorVersion);
+  Print(L"=");
+  Print(L"%d", Smbios_struct.Type1->WakeUpType);  
+  Print(L"=");
+  /* 以下の関数を呼ぶたびにテーブルが一つ進む */
+  int smbios_count;
+  for (smbios_count = 0; smbios_count < smtable->NumberOfSmbiosStructures; smbios_count++){
+      if (Smbios_struct.Hdr->Type == 1) {
+                    AsciiPrint(get_smbios_string(&Smbios_struct, Smbios_struct.Type1->Family));
+          break;
+      } else {
+          smbios_next_table_move(&Smbios_struct);
+      }
+  }
+
+  Print(L"=");
   
+  Print(L"=");
+  /* CopyMem(SystemGuidTest, &Smbios_struct.Type1->Uuid, sizeof(EFI_GUID)); */
+  
+  Print(L"%c", smtable->IntermediateAnchorString[0]);
+  Print(L"%c", smtable->IntermediateAnchorString[1]);
+  Print(L"%x", smtable->MajorVersion);
+  Print(L"%x", smtable->MinorVersion);
+  Print(L"  ");
+  Print(L"%x", smtable->NumberOfSmbiosStructures);
+  Print(L"%x", SystemGuidTest);
+
+
+  /* char *s = find_efi_smbios_table(); */  
+  /* Print(L"%c",s[0]); /\* ’R’ *\/ */
+  /* Print(L"%c",s[1]); /\* ’R’ *\/ */
+  /* Print(L"%c",s[2]); /\* ’R’ *\/ */
+  /* Print(L"%c",s[3]); /\* ’R’ *\/ */
+
+
   gST->ConOut->SetCursorPosition(gST->ConOut, 0, 13);
   Print(L"UEFI information \n");
   Print(L"UEFI Vendor information: %s\n", SystemTable->FirmwareVendor);
   Print(L"UEFI Firmware version: 0x%x\n", SystemTable->FirmwareRevision);
-  Print(L"Support UEFI Specification: ");
+  Print(L"Support UEFI Specification: UEFI");
   switch (SystemTable->Hdr.Revision) {
+      case EFI_1_02_SYSTEM_TABLE_REVISION:
+          Print(L" 1.02 ");
+          break;
+      case EFI_1_10_SYSTEM_TABLE_REVISION:
+          Print(L" 1.10 ");
+          break;
+      case EFI_2_00_SYSTEM_TABLE_REVISION:
+          Print(L" 2.00 ");
+          break;
+      case EFI_2_10_SYSTEM_TABLE_REVISION:
+          Print(L" 2.10 ");
+          break;
+      case EFI_2_20_SYSTEM_TABLE_REVISION:
+          Print(L" 2.20 ");
+          break;
+      case EFI_2_30_SYSTEM_TABLE_REVISION:
+          Print(L" 2.30 ");
+          break;
+      case EFI_2_31_SYSTEM_TABLE_REVISION:
+          Print(L" 2.31 ");
+          break;
+      case EFI_2_40_SYSTEM_TABLE_REVISION:
+          Print(L" 2.40 ");
+          break;
+      case EFI_2_50_SYSTEM_TABLE_REVISION:
+          Print(L" 2.50 ");
+          break;
+      case EFI_2_60_SYSTEM_TABLE_REVISION:
+          Print(L" 2.60 ");
+          break;
       case EFI_2_70_SYSTEM_TABLE_REVISION:
-          Print(L"UEFI 2.70 supported\n");
+          Print(L" 2.70 ");
+          break;
+      case EFI_2_80_SYSTEM_TABLE_REVISION:
+          Print(L" 2.80 ");
+          break;
+      default:
+          Print(L"%x", SystemTable->Hdr.Revision);
   }
+  Print(L"supported\n");
 
   
   
   
-  /* SystemTable->ConOut->ClearScreen(SystemTable->ConOut); */
-  /* Print(L"\n\n\n\n"); */
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 18); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L">    develop boot\n");
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 19); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"     normal  boot\n");
-  
-  /* メモ */
-  /* artist-modeを用いて */
-  /* 肉球のロゴと、WcatOSのロゴをシンプルなものに書き換える */
-  /* PrintではなくSetCursorの座標を変更することで矢印の描画位置を変更するようにする。（もともとあった矢印も空白で上書きをしておく） */
+
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 18); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
+  /* Print(L">    develop boot\n"); */
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 19); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
+  /* Print(L"     normal  boot\n"); */
 
 
   /* Stall用のフラグ */
-  /* uint32_t boot_menu_index = 1; */
-  
-  /* キー入力のテスト */
-  EFI_INPUT_KEY result_key_data = {0, 0};
-  uint32_t boot_menu_index = 0;
   uint32_t stall_flag = 0;
+  boot_menu(&stall_flag);
 
-  for(;;) {
-        result_key_data = efi_wait_any_key();
-        if (result_key_data.ScanCode == 0x01 && boot_menu_index != 0) {
-            boot_menu_index--;
-        } else if (result_key_data.ScanCode == 0x02 && boot_menu_index != 1) { /* ここの１を増やせばメニューを増やせる */
-            boot_menu_index++;
-        } 
-
-        /* case内のカーソルの位置とメニューの数を渡せば勝手に描画を行ってくれる関数を記載する */
-        switch (boot_menu_index) {
-        case 0:
-            gST->ConOut->SetCursorPosition(gST->ConOut, 0, 18); /* QueryMode()でカーソルの位置を指定するAPI */
-            Print(L">    ");
-            gST->ConOut->SetCursorPosition(gST->ConOut, 0, 19);
-            Print(L"     ");
-            stall_flag = 0;
-            /* boot_menu_index = 1 */;
-            break;
-        case 1:
-            gST->ConOut->SetCursorPosition(gST->ConOut, 0, 19); /* QueryMode()でカーソルの位置を指定するAPI */
-            Print(L">    ");
-            gST->ConOut->SetCursorPosition(gST->ConOut, 0, 18);
-            Print(L"     ");
-            stall_flag = 1;
-            /* boot_menu_index = 0; */
-            /* boot_menu_index = 0; */
-            break;
-        }
-        if (result_key_data.UnicodeChar == '\r'){
-            break;
-        }
-
-  }
   
   
     /* SystemTable->BootServices->WaitForEvent(1, &(SystemTable->ConIn->WaitForKey), */
@@ -524,9 +534,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   int i;
   Print(L"Magic Number:");
   for (i = 0; i < 16; i++) {
-#ifndef DEVELOP
-    SystemTable->BootServices->Stall(100000);
-#endif
+    stall_branch(stall_flag);
     Print(L"%02x ", kernele_buf_test[i]);
   }
   Print(L"\n");
@@ -535,7 +543,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   Elf64_Ehdr *kernel_ehdr = (Elf64_Ehdr *)kernel_buffer;
   stall_branch(stall_flag);
   
-  Print(L"entrypoint address:\t");
+  Print(L"entrypoint address: ");
   Print(L"%08x\n", kernel_ehdr->e_entry);
 
   /* 以下にELF形式の */
@@ -612,9 +620,9 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   }
 
   stall_branch(stall_flag);
-  Print(L"kernel first address:\t\t%08x\n", kernel_first_address);
+  Print(L"kernel first address:  %08x\n", kernel_first_address);
   stall_branch(stall_flag);
-  Print(L"kernel last address:\t\t%08x\n", kernel_last_address);
+  Print(L"kernel last address:  %08x\n", kernel_last_address);
 
 
 
