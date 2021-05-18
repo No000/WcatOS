@@ -4,9 +4,11 @@
 #include  <IndustryStandard/SmBios.h>
 #include  <Library/UefiBootServicesTableLib.h> /* gST */
 
+#define PRIVATE static
+#define PUBLIC
 
 
-EFI_STATUS smbios_next_table_move(IN SMBIOS_STRUCTURE_POINTER *Smbios){
+PUBLIC EFI_STATUS smbios_next_table_move(IN SMBIOS_STRUCTURE_POINTER *Smbios){
     CHAR8 *String;
 
     String = (CHAR8 *) (Smbios->Raw + Smbios->Hdr->Length);
@@ -29,7 +31,7 @@ EFI_STATUS smbios_next_table_move(IN SMBIOS_STRUCTURE_POINTER *Smbios){
     return  EFI_NOT_FOUND;      /* このエラー処理はまずいかもしれない */
 }
 
-CHAR8* get_smbios_string(IN SMBIOS_STRUCTURE_POINTER *Smbios,
+PUBLIC CHAR8* get_smbios_string(IN SMBIOS_STRUCTURE_POINTER *Smbios,
                          IN UINT16 StructureNumber)
 {
     UINT16 Index;
@@ -50,7 +52,7 @@ CHAR8* get_smbios_string(IN SMBIOS_STRUCTURE_POINTER *Smbios,
 }
 
 /* GUIDからSMBIOSのエントリテーブルを探す */
-void *find_efi_smbios_table(void) {
+PUBLIC void *find_efi_smbios_table(void) {
     EFI_GUID efi_smbios_table = SMBIOS_TABLE_GUID;
   /* const EFI_GUID efi_smbios = SMBIOS_TABLE_GUID; */
   unsigned long long i;
@@ -71,3 +73,6 @@ void *find_efi_smbios_table(void) {
   }
   return NULL;
 }
+
+#undef PUBLIC
+#undef PRIVATE

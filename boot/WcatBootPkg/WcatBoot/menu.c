@@ -4,16 +4,19 @@
 #include <stdint.h>
 
 
-EFI_INPUT_KEY efi_wait_any_key();
-VOID stall(uint32_t microseconds);
-VOID logo_print();
-VOID menu_init(uint32_t cursor_x, uint32_t cursor_y);
-VOID set_cursor(uint32_t cursor_x, uint32_t cursor_y);
-VOID clear();
-EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data, uint32_t menu_number, uint32_t* boot_menu_index);
+#define PRIVATE static
+#define PUBLIC
+
+PRIVATE EFI_INPUT_KEY efi_wait_any_key();
+PRIVATE VOID stall(uint32_t microseconds);
+PRIVATE VOID logo_print();
+PRIVATE VOID menu_init(uint32_t cursor_x, uint32_t cursor_y);
+PRIVATE VOID set_cursor(uint32_t cursor_x, uint32_t cursor_y);
+PRIVATE VOID clear();
+PRIVATE EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data, uint32_t menu_number, uint32_t* boot_menu_index);
 
 
-VOID boot_menu(uint32_t* stall_flag){
+PUBLIC VOID boot_menu(uint32_t* stall_flag){
     clear();
     logo_print();
     menu_init(0, 18);
@@ -63,7 +66,7 @@ VOID boot_menu(uint32_t* stall_flag){
     }
 }
 
-EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data, uint32_t menu_number, uint32_t* boot_menu_index){
+PRIVATE EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data, uint32_t menu_number, uint32_t* boot_menu_index){
         key_data = efi_wait_any_key();
         if (key_data.ScanCode == 0x01 && *boot_menu_index != 0) {
             *boot_menu_index -= 1;
@@ -73,15 +76,15 @@ EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data, uint32_t menu_number, uint32
         return key_data;
 }
 
-VOID clear(){
+PRIVATE VOID clear(){
     gST->ConOut->ClearScreen(gST->ConOut);
 }
 
-VOID set_cursor(uint32_t cursor_x, uint32_t cursor_y){
+PRIVATE VOID set_cursor(uint32_t cursor_x, uint32_t cursor_y){
     gST->ConOut->SetCursorPosition(gST->ConOut, cursor_x, cursor_y);
 }
 
-VOID menu_init(uint32_t cursor_x, uint32_t cursor_y){
+PRIVATE VOID menu_init(uint32_t cursor_x, uint32_t cursor_y){
     set_cursor(cursor_x, cursor_y);
     Print(L">    develop boot");
     set_cursor(cursor_x + 5, ++cursor_y);
@@ -90,7 +93,7 @@ VOID menu_init(uint32_t cursor_x, uint32_t cursor_y){
     Print(L"information");
 }
 
-EFI_INPUT_KEY efi_wait_any_key(){
+PRIVATE EFI_INPUT_KEY efi_wait_any_key(){
     EFI_INPUT_KEY ret_keydata = { 0, 0};
     EFI_STATUS status;
     UINTN index = 0;
@@ -115,11 +118,11 @@ EFI_INPUT_KEY efi_wait_any_key(){
     return  ret_keydata;
 }
 
-void stall(uint32_t microseconds){
+PRIVATE VOID stall(uint32_t microseconds){
     gST->BootServices->Stall(microseconds);
 }
 
-void logo_print(){
+PRIVATE VOID logo_print(){
      /* ロゴの表示（エスケープシーケンスに注意） */
     gST->ConOut->SetCursorPosition(gST->ConOut, 0, 0); /* QueryMode()でカーソルの位置を指定するAPI */
     Print(L" __       __                        __       ______    ______  \n");
@@ -158,3 +161,6 @@ void logo_print(){
     Print(L"                                                               \n");
     stall(100000);
 }
+
+#undef PRIVATE
+#undef PUBLIC
