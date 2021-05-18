@@ -30,7 +30,8 @@
 #include  <Protocol/BlockIo.h>
 #include  <Guid/FileInfo.h>
 #include  <stdint.h>
-#include  "smbios.h"
+#include "smbios.h"
+#include "menu.h"
 
 #include "elf_header.h"
 /* ELFヘッダーは */
@@ -165,39 +166,39 @@ key_notise(IN EFI_KEY_DATA *KeyData){
 
 
 /* キー入力があるまで待ち、キー入力があれば返す関数のテスト */
-EFI_INPUT_KEY efi_wait_any_key(){
-    EFI_INPUT_KEY retval = { 0, 0};
-    EFI_STATUS status;
-    /* EFI_EVENT timer_event; */
-    /* EFI_EVENT events[1]; */
-    UINTN index = 0;
-    /* events[index++] = gST->ConIn->WaitForKey; */
+/* EFI_INPUT_KEY efi_wait_any_key(){ */
+/*     EFI_INPUT_KEY retval = { 0, 0}; */
+/*     EFI_STATUS status; */
+/*     /\* EFI_EVENT timer_event; *\/ */
+/*     /\* EFI_EVENT events[1]; *\/ */
+/*     UINTN index = 0; */
+/*     /\* events[index++] = gST->ConIn->WaitForKey; *\/ */
 
-    /* status = gBS->CreateEvent(EVT_TIMER, 0, NULL, NULL, &timer_event); */
-    /* events[index++] = timer_event; */
+/*     /\* status = gBS->CreateEvent(EVT_TIMER, 0, NULL, NULL, &timer_event); *\/ */
+/*     /\* events[index++] = timer_event; *\/ */
 
-    status = gBS->WaitForEvent(1, &(gST->ConIn->WaitForKey), &index);
-    while (1) {
-        if (!EFI_ERROR(status)){
-            break;
-        } else {
-            __asm__("hlt");
-        }
-    }
+/*     status = gBS->WaitForEvent(1, &(gST->ConIn->WaitForKey), &index); */
+/*     while (1) { */
+/*         if (!EFI_ERROR(status)){ */
+/*             break; */
+/*         } else { */
+/*             __asm__("hlt"); */
+/*         } */
+/*     } */
     
-    if(!EFI_ERROR(status)) {
-        if(index == 0) {
-            EFI_INPUT_KEY key;
-            status = gST->ConIn->ReadKeyStroke(gST->ConIn, &key);
-            if (!EFI_ERROR(status)) {
-                retval = key;
-            }
-        }
-    } else {
-        Print(L"waitforevent error\n");
-    }
-    return  retval;
-}
+/*     if(!EFI_ERROR(status)) { */
+/*         if(index == 0) { */
+/*             EFI_INPUT_KEY key; */
+/*             status = gST->ConIn->ReadKeyStroke(gST->ConIn, &key); */
+/*             if (!EFI_ERROR(status)) { */
+/*                 retval = key; */
+/*             } */
+/*         } */
+/*     } else { */
+/*         Print(L"waitforevent error\n"); */
+/*     } */
+/*     return  retval; */
+/* } */
 
 /* フラグでStallを分岐する関数 */
 /* statusチェックで動かない際の動作がめんどくさいので後回し */
@@ -227,43 +228,43 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   /* 画面クリアを行う */
   SystemTable->ConOut->ClearScreen(SystemTable->ConOut);
 
-  /* ロゴの表示（エスケープシーケンスに注意） */
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 0); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L" __       __                        __       ______    ______  \n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 1); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"/  |  _  /  |                      /  |     /      \\  /      \\ \n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 2); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"$$ | / \\ $$ |  _______   ______   _$$ |_   /$$$$$$  |/$$$$$$  |\n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 3); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"$$ |/$  \\$$ | /       | /      \\ / $$   |  $$ |  $$ |$$ \\__$$/ \n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 4); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"$$ /$$$  $$ |/$$$$$$$/  $$$$$$  |$$$$$$/   $$ |  $$ |$$      \\ \n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 5); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"$$ $$/$$ $$ |$$ |       /    $$ |  $$ | __ $$ |  $$ | $$$$$$  |\n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 6); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"$$$$/  $$$$ |$$ \\_____ /$$$$$$$ |  $$ |/  |$$ \\__$$ |/  \\__$$ |\n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 7); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"$$$/    $$$ |$$       |$$    $$ |  $$  $$/ $$    $$/ $$    $$/ \n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 8); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"$$/      $$/  $$$$$$$/  $$$$$$$/    $$$$/   $$$$$$/   $$$$$$/  \n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 9); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"                                                               \n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 10); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"                                                               \n");
-  SystemTable->BootServices->Stall(100000);
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 11); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"                                                               \n");
-  SystemTable->BootServices->Stall(100000);
+  /* /\* ロゴの表示（エスケープシーケンスに注意） *\/ */
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 0); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
+  /* Print(L" __       __                        __       ______    ______  \n"); */
+  /* SystemTable->BootServices->Stall(100000); */
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 1); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
+  /* Print(L"/  |  _  /  |                      /  |     /      \\  /      \\ \n"); */
+  /* SystemTable->BootServices->Stall(100000); */
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 2); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
+  /* Print(L"$$ | / \\ $$ |  _______   ______   _$$ |_   /$$$$$$  |/$$$$$$  |\n"); */
+  /* SystemTable->BootServices->Stall(100000); */
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 3); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
+  /* Print(L"$$ |/$  \\$$ | /       | /      \\ / $$   |  $$ |  $$ |$$ \\__$$/ \n"); */
+  /* SystemTable->BootServices->Stall(100000); */
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 4); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
+  /* Print(L"$$ /$$$  $$ |/$$$$$$$/  $$$$$$  |$$$$$$/   $$ |  $$ |$$      \\ \n"); */
+  /* SystemTable->BootServices->Stall(100000); */
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 5); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
+  /* Print(L"$$ $$/$$ $$ |$$ |       /    $$ |  $$ | __ $$ |  $$ | $$$$$$  |\n"); */
+  /* SystemTable->BootServices->Stall(100000); */
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 6); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
+  /* Print(L"$$$$/  $$$$ |$$ \\_____ /$$$$$$$ |  $$ |/  |$$ \\__$$ |/  \\__$$ |\n"); */
+  /* SystemTable->BootServices->Stall(100000); */
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 7); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
+  /* Print(L"$$$/    $$$ |$$       |$$    $$ |  $$  $$/ $$    $$/ $$    $$/ \n"); */
+  /* SystemTable->BootServices->Stall(100000); */
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 8); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
+  /* Print(L"$$/      $$/  $$$$$$$/  $$$$$$$/    $$$$/   $$$$$$/   $$$$$$/  \n"); */
+  /* SystemTable->BootServices->Stall(100000); */
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 9); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
+  /* Print(L"                                                               \n"); */
+  /* SystemTable->BootServices->Stall(100000); */
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 10); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
+  /* Print(L"                                                               \n"); */
+  /* SystemTable->BootServices->Stall(100000); */
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 11); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
+  /* Print(L"                                                               \n"); */
+  /* SystemTable->BootServices->Stall(100000); */
 
   /* ベンダー情報を記載 */
   /* FirmWare vendor情報 */
@@ -368,60 +369,17 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   
   
   
-  /* SystemTable->ConOut->ClearScreen(SystemTable->ConOut); */
-  /* Print(L"\n\n\n\n"); */
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 18); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L">    develop boot\n");
-  gST->ConOut->SetCursorPosition(gST->ConOut, 0, 19); /* QueryMode()でカーソルの位置を指定するAPI */
-  Print(L"     normal  boot\n");
-  
-  /* メモ */
-  /* artist-modeを用いて */
-  /* 肉球のロゴと、WcatOSのロゴをシンプルなものに書き換える */
-  /* PrintではなくSetCursorの座標を変更することで矢印の描画位置を変更するようにする。（もともとあった矢印も空白で上書きをしておく） */
+
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 18); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
+  /* Print(L">    develop boot\n"); */
+  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 19); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
+  /* Print(L"     normal  boot\n"); */
 
 
   /* Stall用のフラグ */
-  /* uint32_t boot_menu_index = 1; */
-  
-  /* キー入力のテスト */
-  EFI_INPUT_KEY result_key_data = {0, 0};
-  uint32_t boot_menu_index = 0;
   uint32_t stall_flag = 0;
+  boot_menu(&stall_flag);
 
-  for(;;) {
-        result_key_data = efi_wait_any_key();
-        if (result_key_data.ScanCode == 0x01 && boot_menu_index != 0) {
-            boot_menu_index--;
-        } else if (result_key_data.ScanCode == 0x02 && boot_menu_index != 1) { /* ここの１を増やせばメニューを増やせる */
-            boot_menu_index++;
-        } 
-
-        /* case内のカーソルの位置とメニューの数を渡せば勝手に描画を行ってくれる関数を記載する */
-        switch (boot_menu_index) {
-        case 0:
-            gST->ConOut->SetCursorPosition(gST->ConOut, 0, 18); /* QueryMode()でカーソルの位置を指定するAPI */
-            Print(L">    ");
-            gST->ConOut->SetCursorPosition(gST->ConOut, 0, 19);
-            Print(L"     ");
-            stall_flag = 0;
-            /* boot_menu_index = 1 */;
-            break;
-        case 1:
-            gST->ConOut->SetCursorPosition(gST->ConOut, 0, 19); /* QueryMode()でカーソルの位置を指定するAPI */
-            Print(L">    ");
-            gST->ConOut->SetCursorPosition(gST->ConOut, 0, 18);
-            Print(L"     ");
-            stall_flag = 1;
-            /* boot_menu_index = 0; */
-            /* boot_menu_index = 0; */
-            break;
-        }
-        if (result_key_data.UnicodeChar == '\r'){
-            break;
-        }
-
-  }
   
   
     /* SystemTable->BootServices->WaitForEvent(1, &(SystemTable->ConIn->WaitForKey), */
