@@ -218,53 +218,11 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   EFI_FILE_INFO *file_info;
   struct FILE file_list[10];
   int index = 0;
-  /* EFI_INPUT_KEY key; */
-  /* UINTN waitIndex; */
 
   /* watchdogタイマの無効化 */
   /* 5分刻みで再起動してしまうのを防ぐ。 */
   SystemTable->BootServices->SetWatchdogTimer(0, 0, 0, NULL);
 
-  /* 画面クリアを行う */
-  SystemTable->ConOut->ClearScreen(SystemTable->ConOut);
-
-  /* /\* ロゴの表示（エスケープシーケンスに注意） *\/ */
-  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 0); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
-  /* Print(L" __       __                        __       ______    ______  \n"); */
-  /* SystemTable->BootServices->Stall(100000); */
-  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 1); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
-  /* Print(L"/  |  _  /  |                      /  |     /      \\  /      \\ \n"); */
-  /* SystemTable->BootServices->Stall(100000); */
-  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 2); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
-  /* Print(L"$$ | / \\ $$ |  _______   ______   _$$ |_   /$$$$$$  |/$$$$$$  |\n"); */
-  /* SystemTable->BootServices->Stall(100000); */
-  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 3); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
-  /* Print(L"$$ |/$  \\$$ | /       | /      \\ / $$   |  $$ |  $$ |$$ \\__$$/ \n"); */
-  /* SystemTable->BootServices->Stall(100000); */
-  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 4); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
-  /* Print(L"$$ /$$$  $$ |/$$$$$$$/  $$$$$$  |$$$$$$/   $$ |  $$ |$$      \\ \n"); */
-  /* SystemTable->BootServices->Stall(100000); */
-  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 5); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
-  /* Print(L"$$ $$/$$ $$ |$$ |       /    $$ |  $$ | __ $$ |  $$ | $$$$$$  |\n"); */
-  /* SystemTable->BootServices->Stall(100000); */
-  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 6); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
-  /* Print(L"$$$$/  $$$$ |$$ \\_____ /$$$$$$$ |  $$ |/  |$$ \\__$$ |/  \\__$$ |\n"); */
-  /* SystemTable->BootServices->Stall(100000); */
-  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 7); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
-  /* Print(L"$$$/    $$$ |$$       |$$    $$ |  $$  $$/ $$    $$/ $$    $$/ \n"); */
-  /* SystemTable->BootServices->Stall(100000); */
-  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 8); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
-  /* Print(L"$$/      $$/  $$$$$$$/  $$$$$$$/    $$$$/   $$$$$$/   $$$$$$/  \n"); */
-  /* SystemTable->BootServices->Stall(100000); */
-  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 9); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
-  /* Print(L"                                                               \n"); */
-  /* SystemTable->BootServices->Stall(100000); */
-  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 10); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
-  /* Print(L"                                                               \n"); */
-  /* SystemTable->BootServices->Stall(100000); */
-  /* gST->ConOut->SetCursorPosition(gST->ConOut, 0, 11); /\* QueryMode()でカーソルの位置を指定するAPI *\/ */
-  /* Print(L"                                                               \n"); */
-  /* SystemTable->BootServices->Stall(100000); */
 
   /* ベンダー情報を記載 */
   /* FirmWare vendor情報 */

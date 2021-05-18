@@ -9,18 +9,20 @@ VOID stall(uint32_t microseconds);
 VOID logo_print();
 VOID menu_init(uint32_t cursor_x, uint32_t cursor_y);
 VOID set_cursor(uint32_t cursor_x, uint32_t cursor_y);
+VOID clear();
 EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data, uint32_t menu_number, uint32_t* boot_menu_index);
 
 
 VOID boot_menu(uint32_t* stall_flag){
+    clear();
     logo_print();
     menu_init(0, 18);
     EFI_INPUT_KEY result_key_data = {0, 0};
     uint32_t boot_menu_index = 0;
     uint32_t boot_process_start_flag = 0;
     for(;;) {
-        /* result_key_dataとboot_menu_indexは */
-        /* 構造体でまとめても良かったのですが、グローバル変数が増えるのが嫌だったので、ポインタ渡しで実装 */
+        /* result_key_dataとboot_menu_indexは、構造体でまとめても良かったのですが */
+        /* グローバル変数が増えるのが嫌だったので、ポインタ渡しで実装 */
         result_key_data = menu_sentinel(result_key_data, 2, &boot_menu_index);
 
         /* case内のカーソルの位置とメニューの数を渡せば勝手に描画を行ってくれる関数を記載する */
@@ -69,6 +71,10 @@ EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data, uint32_t menu_number, uint32
             *boot_menu_index += 1;
         }
         return key_data;
+}
+
+VOID clear(){
+    gST->ConOut->ClearScreen(gST->ConOut);
 }
 
 VOID set_cursor(uint32_t cursor_x, uint32_t cursor_y){
