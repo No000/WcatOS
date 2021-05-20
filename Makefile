@@ -8,8 +8,21 @@
 .PHONY: boot kernel run tool
 
 SHELL = /bin/bash
+
+
 QEMU = qemu-system-x86_64
-OVMF = /tool/OVMF/OVMF.fd
+# メモリ指定
+QEMU_OPTION += -m 512
+# シリアル通信をコンソールに接続
+QEMU_SERIAL = -serial mon:stdio
+QEMU_OPTION += -d cpu_reset -bios $(OVMF) -hda fat:rw:test
+# SMBIOSの設定
+QEMU_OPTION += -smbios type=1,family=tetoto
+# KVMサポート
+QEMU_OPTION += -enable-kvm -machine type=pc,accel=kvm
+# マルチコアの設定
+QEMU_OPTION += -smp 2
+
 
 ROOTDIR = $(CURDIR)
 OVMF = $(ROOTDIR)/tool/OVMF/OVMF.fd
@@ -27,8 +40,7 @@ kernel:
 	cp kernel/kernel.elf ./test	
 
 run:
-	$(QEMU) \
-		-m 512 -serial mon:stdio -d cpu_reset -bios $(OVMF) -hda fat:rw:test -smbios type=1,family=tetoto
+	$(QEMU) $(QEMU_OPTION) $(QEMU_SERIAL)
 
 tool:
 	cd ${EDK_WORKSPACE}; source edksetup.sh --reconfig;\
