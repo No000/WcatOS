@@ -1,6 +1,7 @@
 #include  <Uefi.h>
 #include  <Library/UefiLib.h>                  /* Print */
 #include <Library/UefiBootServicesTableLib.h>  /* gST */
+#include <Library/UefiRuntimeServicesTableLib.h> /* gRT */
 #include <stdint.h>
 
 
@@ -14,7 +15,7 @@ PRIVATE VOID menu_init(uint32_t cursor_x, uint32_t cursor_y);
 PRIVATE VOID set_cursor(uint32_t cursor_x, uint32_t cursor_y);
 PRIVATE VOID clear();
 PRIVATE EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data, uint32_t menu_number, uint32_t* boot_menu_index);
-
+PRIVATE VOID shutdown_menu();
 
 PUBLIC VOID boot_menu(uint32_t* stall_flag){
     clear();
@@ -23,10 +24,11 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
     EFI_INPUT_KEY result_key_data = {0, 0};
     uint32_t boot_menu_index = 0;
     uint32_t boot_process_start_flag = 0;
+    uint32_t menu_shutdown_flag = 0;
     for(;;) {
         /* result_key_dataとboot_menu_indexは、構造体でまとめても良かったのですが */
         /* グローバル変数が増えるのが嫌だったので、ポインタ渡しで実装 */
-        result_key_data = menu_sentinel(result_key_data, 2, &boot_menu_index);
+        result_key_data = menu_sentinel(result_key_data, 3, &boot_menu_index);
 
         /* case内のカーソルの位置とメニューの数を渡せば勝手に描画を行ってくれる関数を記載する */
         switch (boot_menu_index) {
@@ -36,6 +38,8 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
             set_cursor(0, 19);
             Print(L"     ");
             set_cursor(0, 20);
+            Print(L"     ");
+            set_cursor(0, 21);
             Print(L"     ");
             boot_process_start_flag = 1;
             *stall_flag = 0;
@@ -47,6 +51,8 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
             Print(L">    ");
             set_cursor(0, 20);
             Print(L"     ");
+            set_cursor(0, 21);
+            Print(L"     ");
             boot_process_start_flag = 1;
             *stall_flag = 1;
             break;
@@ -57,13 +63,36 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
             Print(L"     ");
             set_cursor(0, 20);
             Print(L">    ");
+            set_cursor(0, 21);
+            Print(L"     ");
             boot_process_start_flag = 0;
+            break;
+        case 3:
+            set_cursor(0, 18);
+            Print(L"     ");
+            set_cursor(0, 19);
+            Print(L"     ");
+            set_cursor(0, 20);
+            Print(L"     ");
+            set_cursor(0, 21);
+            Print(L">    ");
+            boot_process_start_flag = 0;
+            menu_shutdown_flag = 1;
             break;
         }
         if (result_key_data.UnicodeChar == '\r' && boot_process_start_flag == 1){
             return;
+        } else if (result_key_data.UnicodeChar == '\r' && menu_shutdown_flag == 1){
+            shutdown_menu();
+            return;
         }
     }
+}
+
+PRIVATE VOID shutdown_menu(){
+    gRT->ResetSystem(EfiResetShutdown, 0, 0, "shutdown");
+    CpuDeadLoop();
+    return;
 }
 
 PRIVATE EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data, uint32_t menu_number, uint32_t* boot_menu_index){
@@ -91,6 +120,8 @@ PRIVATE VOID menu_init(uint32_t cursor_x, uint32_t cursor_y){
     Print(L"normal  boot");
     set_cursor(cursor_x + 5, ++cursor_y);
     Print(L"information");
+    set_cursor(cursor_x + 5, ++cursor_y);
+    Print(L"shutdown");
 }
 
 PRIVATE EFI_INPUT_KEY efi_wait_any_key(){

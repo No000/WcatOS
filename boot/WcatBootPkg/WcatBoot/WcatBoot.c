@@ -788,7 +788,11 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
 	q[i].Blue = 0x2F;	
   }
   /* カーネル側での手土産の設定とカーネルさんへのお願い */
-  UINT64 entry_addr = *(UINT64*)(kernel_first_address + 24);
+
+  /* ELFの24に関しては以下を参照 */
+  /* https://wiki.osdev.org/ELF */
+  #define PROGRAM_ENTRY_POSION_OFFSET 24 /* magic number対策 */
+  UINT64 entry_addr = *(UINT64*)(kernel_first_address + PROGRAM_ENTRY_POSION_OFFSET);
   typedef void EntryPointType(const struct VIDEO_INFO*);
 
   EntryPointType* entry_point = (EntryPointType*)entry_addr;

@@ -9,16 +9,26 @@ clangとLLD,Qemuに関してはManjaroLinuxで開発している関係上、バ�
 - QEMU emulator version 5.2.0
 
 * 開発環境
-** EDK2のセットアップ
-toolディレクトリにedk2を追加する
-#+BEGIN_SRC shell
-git clone https://github.com/tianocore/edk2
-#+END_SRC
-クローンした後、セットアップとして以下のコマンドを実行します。（これは今後シェルスクリプトにする予定です）
+** WcatOSのクローンとEDK2のセットアップ
+WcatOSをクローンする(--recursiveを忘れないように!)
+SSH keyを登録している場合
+#+begin_src shell
+git clone git@github.com:No000/WcatOS.git --recursive
+#+end_src
+
+していない場合
+#+begin_src shell
+git clone https://github.com/No000/WcatOS.git --recursive
+#+end_src
+するとWcatOSディレクトリができる。
+
+次に、tool/edk2/に移動し、以下のコマンドを叩く
 #+BEGIN_SRC shell
 git submodule update --init
 make -C BaseTools/Source/C
 #+END_SRC
+以上でセットアップ完了である。
+
 ** OVMFのビルド
 WcatOSディレクトリ内で
 #+begin_src bash
@@ -32,6 +42,9 @@ WcatOSディレクトリ内で
 make all
 #+END_SRC
 すればビルドと実行が行われ、Qemuが起動します。
+
+** ブランチに関して
+developがQemuテストで、masterがthinkpad X230による実機テストを行ったものとなります。
 
 * 参考文献
 - [[https://github.com/uchan-nos/mikanos][MikanOS]]
