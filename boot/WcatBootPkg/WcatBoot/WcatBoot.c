@@ -32,7 +32,7 @@
 #include  <stdint.h>
 #include "smbios.h"
 #include "menu.h"
-
+#include "wcat_boot_header.h"
 #include "elf_header.h"
 /* ELFヘッダーは */
 
@@ -56,13 +56,13 @@ struct FILE {
 /* boot時にカーネルに渡す情報 */
 /* マルチブート2に準拠した構成にするか悩み中 */
 /* とりあえずで作成したminOSベースの構造体 */
-struct VIDEO_INFO {
-  uint8_t *frame_buffer_addr;
-  uint64_t frame_buffer_size;
-  uint32_t horizen_size;
-  uint32_t vertical_size;
-  uint32_t pixel_per_scanline;
-};
+/* struct VIDEO_INFO { */
+/*   uint8_t *frame_buffer_addr; */
+/*   uint64_t frame_buffer_size; */
+/*   uint32_t horizen_size; */
+/*   uint32_t vertical_size; */
+/*   uint32_t pixel_per_scanline; */
+/* }; */
 
 /* このMemoryMapはヘッダーファイル化してkernelにもincludeさせる必要があるかもしれない
  */
@@ -650,7 +650,8 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   EFI_GRAPHICS_OUTPUT_PROTOCOL *gop;
   UINTN num_gop_handles = 0;	/*  */
   EFI_HANDLE *gop_handles = NULL;
-  struct VIDEO_INFO video_infomation;
+  /* struct VIDEO_INFO video_infomation; */
+  struct WCAT_HEADER wcat_boot_information;
   
   status = SystemTable->BootServices->LocateHandleBuffer(ByProtocol,
 														 &gEfiGraphicsOutputProtocolGuid,
@@ -693,11 +694,11 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   /* } */
 
   /* カーネルに渡すグラフィックのデータ */
-  video_infomation.frame_buffer_addr = (uint8_t *)gop->Mode->FrameBufferBase;
-  video_infomation.frame_buffer_size = (uint64_t)gop->Mode->FrameBufferSize;
-  video_infomation.horizen_size = (uint32_t)gop->Mode->Info->HorizontalResolution;
-  video_infomation.vertical_size = (uint32_t)gop->Mode->Info->VerticalResolution;
-  video_infomation.pixel_per_scanline = (uint32_t)gop->Mode->Info->PixelsPerScanLine;
+  wcat_boot_information.video_information.frame_buffer_addr = (uint8_t *)gop->Mode->FrameBufferBase;
+  wcat_boot_information.video_information.frame_buffer_size = (uint64_t)gop->Mode->FrameBufferSize;
+  wcat_boot_information.video_information.horizen_size = (uint32_t)gop->Mode->Info->HorizontalResolution;
+  wcat_boot_information.video_information.vertical_size = (uint32_t)gop->Mode->Info->VerticalResolution;
+  wcat_boot_information.video_information.pixel_per_scanline = (uint32_t)gop->Mode->Info->PixelsPerScanLine;
   
   /* ====================================================================================== */
   /* ExitBootServicesするためのmemorymapを取得する */
@@ -793,10 +794,10 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
   /* https://wiki.osdev.org/ELF */
   #define PROGRAM_ENTRY_POSION_OFFSET 24 /* magic number対策 */
   UINT64 entry_addr = *(UINT64*)(kernel_first_address + PROGRAM_ENTRY_POSION_OFFSET);
-  typedef void EntryPointType(const struct VIDEO_INFO*);
+  typedef void EntryPointType(const struct WCAT_HEADER*);
 
   EntryPointType* entry_point = (EntryPointType*)entry_addr;
-  entry_point(&video_infomation);
+  entry_point(&wcat_boot_information);
 
   while (1) {
 	EFI_SUCCESS;

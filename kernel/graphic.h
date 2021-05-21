@@ -7,13 +7,25 @@ typedef struct color{
   uint8_t red;
 } color;
 
-typedef struct VIDEO_INFO {
+typedef  struct VIDEO_INFO {
   uint8_t *frame_buffer_addr;
   uint64_t frame_buffer_size;
   uint32_t horizen_size;
   uint32_t vertical_size;
   uint32_t pixel_per_scanline;
-} VIDEO_INFO;
+}VIDEO_INFO;
+
+typedef  struct WCAT_HEADER {
+    VIDEO_INFO video_information;
+}WCAT_HEADER;
+
+/* typedef struct VIDEO_INFO { */
+/*   uint8_t *frame_buffer_addr; */
+/*   uint64_t frame_buffer_size; */
+/*   uint32_t horizen_size; */
+/*   uint32_t vertical_size; */
+/*   uint32_t pixel_per_scanline; */
+/* } VIDEO_INFO; */
 
 typedef struct pixel_bit_mask{
   uint8_t blue_mask;

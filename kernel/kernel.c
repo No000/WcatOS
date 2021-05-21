@@ -75,7 +75,7 @@ void print_string(char *string, VIDEO_INFO vudeo_info, color pixel_color) {
 
 
 
-void kernel_main(VIDEO_INFO *video_infomation) {
+void kernel_main(WCAT_HEADER *wcat_boot_information) {
   int i;
   uint8_t output_data[14] = "kernel_success";
 
@@ -86,22 +86,22 @@ void kernel_main(VIDEO_INFO *video_infomation) {
   }
 
   pixel_bit_mask *frame_buffer =
-      (pixel_bit_mask *)video_infomation->frame_buffer_addr;
-  for (uint32_t i = 0; i < video_infomation->frame_buffer_size; ++i) {
+      (pixel_bit_mask *)wcat_boot_information->video_information.frame_buffer_addr;
+  for (uint32_t i = 0; i < wcat_boot_information->video_information.frame_buffer_size; ++i) {
     frame_buffer[i].red_mask = 0xad;
     frame_buffer[i].green_mask = 0xff;
     frame_buffer[i].blue_mask = 0x2f;
   }
-  drow_pixel(1, 100, BLACK, *video_infomation);
-  drow_horizon_pixel(100, 100, 500, BLACK, *video_infomation);
-  drow_vertical_pixel(100, 100, 300, BLACK, *video_infomation);
+  drow_pixel(1, 100, BLACK, wcat_boot_information->video_information);
+  drow_horizon_pixel(100, 100, 500, BLACK, wcat_boot_information->video_information);
+  drow_vertical_pixel(100, 100, 300, BLACK, wcat_boot_information->video_information);
 
   
   /* print_char('-', *video_infomation); */
   /* print_char('A', *video_infomation); */
 
 
-  print_string("!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", *video_infomation, BLACK);
+  print_string("!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", wcat_boot_information->video_information, BLACK);
  
   while (1)
     hlt();
