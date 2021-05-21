@@ -43,6 +43,9 @@ make all
 #+END_SRC
 すればビルドと実行が行われ、Qemuが起動します。
 
+** ブランチに関して
+developがQemuテストで、masterがthinkpad X230による実機テストを行ったものとなります。
+
 * 参考文献
 - [[https://github.com/uchan-nos/mikanos][MikanOS]]
 - [[http://yuma.ohgami.jp/][大神　祐真さんの自作OS関連の資料]]
