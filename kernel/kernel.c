@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include "graphic.h"
 #include "font.h"
+#include "../boot/WcatBootPkg/WcatBoot/wcat_boot_header.h"
 
 color BLACK = {0x00, 0x00, 0x00};
 

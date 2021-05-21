@@ -12,9 +12,9 @@ typedef  struct VIDEO_INFO {
   uint32_t pixel_per_scanline;
 }VIDEO_INFO;
 
-struct WCAT_HEADER {
+typedef struct WCAT_HEADER {
     VIDEO_INFO video_information;
-};
+}WCAT_HEADER;
 
 #pragma pack()
 
