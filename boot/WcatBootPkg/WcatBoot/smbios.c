@@ -1,5 +1,4 @@
 #include  <Uefi.h>
-#include  <Library/UefiBootServicesTableLib.h> /* gST */
 #include  <Guid/SmBios.h>                       /* SMBIOS */
 #include  <IndustryStandard/SmBios.h>
 #include  <Library/UefiBootServicesTableLib.h> /* gST */
@@ -31,6 +30,9 @@ PUBLIC EFI_STATUS smbios_next_table_move(IN SMBIOS_STRUCTURE_POINTER *Smbios){
     return  EFI_NOT_FOUND;      /* このエラー処理はまずいかもしれない */
 }
 
+
+
+
 PUBLIC CHAR8* get_smbios_string(IN SMBIOS_STRUCTURE_POINTER *Smbios,
                          IN UINT16 StructureNumber)
 {
@@ -50,6 +52,9 @@ PUBLIC CHAR8* get_smbios_string(IN SMBIOS_STRUCTURE_POINTER *Smbios,
     }
     return NULL;
 }
+
+
+
 
 /* GUIDからSMBIOSのエントリテーブルを探す */
 PUBLIC void *find_efi_smbios_table(void) {
@@ -73,6 +78,9 @@ PUBLIC void *find_efi_smbios_table(void) {
   }
   return NULL;
 }
+
+
+
 
 #undef PUBLIC
 #undef PRIVATE
