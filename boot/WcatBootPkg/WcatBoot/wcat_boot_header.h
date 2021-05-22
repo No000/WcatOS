@@ -12,8 +12,18 @@ typedef  struct VIDEO_INFO {
   uint32_t pixel_per_scanline;
 }VIDEO_INFO;
 
+typedef struct MEMORY_MAP {
+    unsigned long long buffer_size;
+    void *buffer;
+    unsigned long long map_size;
+    unsigned long long map_key;
+    unsigned long long descriptor_size;
+    uint32_t descriptor_version;
+}MEMORY_MAP;
+
 typedef struct WCAT_HEADER {
     VIDEO_INFO video_information;
+    MEMORY_MAP memory_information;
 }WCAT_HEADER;
 
 #pragma pack()
