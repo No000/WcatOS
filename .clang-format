@@ -1,0 +1,4 @@
+PointerAlignment: Left
+IncludeBlocks: IBS_Regroup
+IndentWidth:4
+UseTab: Never
