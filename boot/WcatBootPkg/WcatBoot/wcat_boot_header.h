@@ -2,7 +2,9 @@
 #define _WCAT_BOOT_HEADER_H_
 #include <stdint.h>
 
+
 #pragma pack(1)
+
 
 typedef  struct VIDEO_INFO {
   uint8_t *frame_buffer_addr;
@@ -24,8 +26,10 @@ typedef struct MEMORY_MAP {
 typedef struct WCAT_HEADER {
     VIDEO_INFO video_information;
     MEMORY_MAP memory_information;
-}WCAT_HEADER;
+}wcat_HEADER;
 
 #pragma pack()
+
+
 
 #endif
