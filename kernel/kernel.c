@@ -9,14 +9,16 @@
  */
 
 
+#include <stdarg.h>
 #include <stdint.h>
 #include "graphic.h"
 #include "font.h"
-#include "../boot/WcatBootPkg/WcatBoot/wcat_boot_header.h"
+
 
 color BLACK = {0x00, 0x00, 0x00};
 
 #define INTEL_ASM_BEGIN ".intel_syntax noprefix\n\t" /* clangの場合.att_syntax prefixは必要ない */
+#define NULL (void *)0
 
 /* out命令におきかえる */
 void serialport_output(uint8_t ascii_code) {
@@ -76,15 +78,46 @@ void print_string(char *string, VIDEO_INFO vudeo_info, color pixel_color) {
 
 
 
-void kernel_main(WCAT_HEADER *wcat_boot_information) {
+
+uint64_t dec2asc(char *str, uint64_t dec){
+    uint64_t len = 0, len_buf;
+    uint64_t buf[100];
+    while (1){
+        buf[len++] = dec % 10;
+        if (dec < 10) break;
+        dec /= 10;
+    }
+    len_buf = len;
+    while(len){
+        *(str++) = buf[--len] + 0x30;
+    }
+    return len_buf;
+}
+
+
+
+void print_test(uint64_t i_i, VIDEO_INFO video_info, color pixel_color){
+    char s[100];
+    uint64_t len;
+    len = dec2asc(s, i_i);
+    for (int i = 0; i < len; i++) {
+        print_char(s[i], video_info, pixel_color);
+    }
+}
+
+
+
+void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   int i;
   uint8_t output_data[14] = "kernel_success";
-
+  /* KERNEL_EFI_RUNTIME_SERVICE *gRT = (KERNEL_EFI_RUNTIME_SERVICE *)wcat_boot_information->runtime_service_address; */
   
 
   for (i = 0; i < 14; i++){
 	serialport_output(output_data[i]);
   }
+
+  
 
   pixel_bit_mask *frame_buffer =
       (pixel_bit_mask *)wcat_boot_information->video_information.frame_buffer_addr;
@@ -101,9 +134,9 @@ void kernel_main(WCAT_HEADER *wcat_boot_information) {
   /* print_char('-', *video_infomation); */
   /* print_char('A', *video_infomation); */
 
-
-  print_string("!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", wcat_boot_information->video_information, BLACK);
- 
+  /* uint64_t test_val = 1234567891234567891; */
+  /* print_string("!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", wcat_boot_information->video_information, BLACK); */
+  print_test(wcat_boot_information->video_information.horizen_size, wcat_boot_information->video_information, BLACK);
   while (1)
     hlt();
 }
