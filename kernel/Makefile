@@ -15,7 +15,8 @@ CFLAGS = -O2 \
 		-mno-red-zone \
 		-fno-exceptions \
 		-fno-rtti \
-		-std=c17
+		-std=c17 \
+		-fms-extensions
 
 
 LD = ld.lld
