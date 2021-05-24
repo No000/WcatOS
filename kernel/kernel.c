@@ -9,8 +9,9 @@
  */
 
 
-#include <stdarg.h>
+
 #include <stdint.h>
+#include <wchar.h>
 #include "graphic.h"
 #include "font.h"
 
@@ -18,7 +19,6 @@
 color BLACK = {0x00, 0x00, 0x00};
 
 #define INTEL_ASM_BEGIN ".intel_syntax noprefix\n\t" /* clangの場合.att_syntax prefixは必要ない */
-#define NULL (void *)0
 
 /* out命令におきかえる */
 void serialport_output(uint8_t ascii_code) {
@@ -49,7 +49,7 @@ uint32_t cursor_x = 0;
 uint32_t cursor_y = 0;
 
 
-void print_char(char c, VIDEO_INFO video_info, color pixel_color) {
+void print_char(wchar_t c, VIDEO_INFO video_info, color pixel_color) {
   int x = 0, y = 0;
   /* 実験なのでインデックスは0固定 */
   for (y = 0; y < FONT_HEIGHT; y++) {
@@ -68,7 +68,7 @@ void print_char(char c, VIDEO_INFO video_info, color pixel_color) {
   }
 }
 
-void print_string(char *string, VIDEO_INFO vudeo_info, color pixel_color) {
+void print_string(wchar_t *string, VIDEO_INFO vudeo_info, color pixel_color) {
   int i = 0;
   while (string[i] != '\0') {
 	print_char(string[i], vudeo_info, pixel_color);
@@ -76,12 +76,27 @@ void print_string(char *string, VIDEO_INFO vudeo_info, color pixel_color) {
   }
 }
 
-
+//16進数からASCIIコードに変換
+uint64_t hex2asc (char *str, uint64_t dec) {
+    uint64_t len = 0, len_buf;
+    wchar_t buf[16];
+    while (1) {
+        buf[len++] = dec % 16;
+        if (dec < 16) break;
+        dec /= 16;
+    }
+    len_buf = len;
+    while (len) {
+        len --;
+        *(str++) = (buf[len]<10)?(buf[len] + 0x30):(buf[len] - 9 + 0x40);
+    }
+    return len_buf;
+}
 
 
 uint64_t dec2asc(char *str, uint64_t dec){
     uint64_t len = 0, len_buf;
-    uint64_t buf[100];
+    uint64_t buf[20];
     while (1){
         buf[len++] = dec % 10;
         if (dec < 10) break;
@@ -94,10 +109,26 @@ uint64_t dec2asc(char *str, uint64_t dec){
     return len_buf;
 }
 
+uint64_t bin2asc(char *str, uint64_t bin){
+    uint64_t len = 0, len_buf;
+    uint64_t buf[64];
+    while (1) {
+        buf[len++] = bin % 2;
+        if (bin < 2) break;
+        bin /= 2;
+    }
+
+    len_buf = len;
+    while (len) {
+        *(str++) = buf[--len] + 0x30;
+    }
+    return len_buf;
+}
 
 
+#define MAX64_DIGIT 64
 void print_test(uint64_t i_i, VIDEO_INFO video_info, color pixel_color){
-    char s[100];
+    char s[MAX64_DIGIT];
     uint64_t len;
     len = dec2asc(s, i_i);
     for (int i = 0; i < len; i++) {
@@ -110,14 +141,11 @@ void print_test(uint64_t i_i, VIDEO_INFO video_info, color pixel_color){
 void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   int i;
   uint8_t output_data[14] = "kernel_success";
-  /* KERNEL_EFI_RUNTIME_SERVICE *gRT = (KERNEL_EFI_RUNTIME_SERVICE *)wcat_boot_information->runtime_service_address; */
-  
 
   for (i = 0; i < 14; i++){
 	serialport_output(output_data[i]);
   }
 
-  
 
   pixel_bit_mask *frame_buffer =
       (pixel_bit_mask *)wcat_boot_information->video_information.frame_buffer_addr;
@@ -134,9 +162,13 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   /* print_char('-', *video_infomation); */
   /* print_char('A', *video_infomation); */
 
-  /* uint64_t test_val = 1234567891234567891; */
+  uint64_t test_val = 0xabc;
   /* print_string("!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", wcat_boot_information->video_information, BLACK); */
+  print_test(test_val, wcat_boot_information->video_information, BLACK);
+
   print_test(wcat_boot_information->video_information.horizen_size, wcat_boot_information->video_information, BLACK);
+  print_char('\n', wcat_boot_information->video_information, BLACK);
+  print_test(wcat_boot_information->video_information.vertical_size, wcat_boot_information->video_information, BLACK);
   while (1)
     hlt();
 }
