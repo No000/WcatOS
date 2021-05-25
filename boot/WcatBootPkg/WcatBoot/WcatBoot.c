@@ -11,29 +11,31 @@
 /* 12/21 ClearscreenとPrintを高速で繰り返せば選択画面を作れそう。（キー入力があれば、内容を書き換えた画面を表示） */
 /* 数値の出力にはEFI_LIGHTCYANでシアン色に変更することにする */
 
-
-
-
-#include  <Uefi.h>
-#include  <Library/UefiLib.h>                  /* Print */
-#include  <Library/UefiBootServicesTableLib.h> /* gST */
-#include  <Library/PrintLib.h>
-#include  <Library/MemoryAllocationLib.h>
-#include  <Library/BaseMemoryLib.h>
-#include  <Protocol/LoadedImage.h>
-#include  <Protocol/SimpleFileSystem.h>
-
-#include  <Protocol/SimpleTextOut.h> /* 追加(いらんかも？) */
-#include  <Guid/SmBios.h>            /* SMBIOS */
-#include  <IndustryStandard/SmBios.h>
-#include  <Protocol/DiskIo2.h>
-#include  <Protocol/BlockIo.h>
-#include  <Guid/FileInfo.h>
-#include  <stdint.h>
-#include "smbios.h"
-#include "menu.h"
-#include "wcat_boot_header.h"
 #include "elf_header.h"
+#include "menu.h"
+#include "smbios.h"
+#include "wcat_boot_header.h"
+
+
+#include <Guid/FileInfo.h>
+#include <Guid/SmBios.h> /* SMBIOS */
+#include <IndustryStandard/SmBios.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/PrintLib.h>
+#include <Library/UefiBootServicesTableLib.h> /* gST */
+#include <Library/UefiLib.h>                  /* Print */
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Protocol/BlockIo.h>
+#include <Protocol/DiskIo2.h>
+#include <Protocol/LoadedImage.h>
+#include <Protocol/SimpleFileSystem.h>
+#include <Protocol/SimpleTextOut.h> /* 追加(いらんかも？) */
+#include <Uefi.h>
+#include <stdint.h>
+
+#include "util.h"
+#include "util.h"
 /* ELFヘッダーは */
 
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *SFSP;
@@ -51,7 +53,6 @@ struct FILE {
     uint16_t name[MAX_FILE_NAME_LEN];
 } __attribute__((packed));
 
-
 /* このMemoryMapはヘッダーファイル化してkernelにもincludeさせる必要があるかもしれない
  */
 /* mikanosのkernel/memory_map.hppを参考に作成 */
@@ -66,79 +67,6 @@ struct MemoryMap {
 
 
 
-
-
-/* statusチェックの自動化 */
-void status_cheacker(EFI_SYSTEM_TABLE *SystemTable, EFI_STATUS status) {
-    Print(L"[");
-    if (EFI_ERROR(status)) {
-        SystemTable->ConOut->SetAttribute(SystemTable->ConOut, EFI_LIGHTRED);
-        Print(L"%r", status);
-    } else {
-        SystemTable->ConOut->SetAttribute(SystemTable->ConOut, EFI_LIGHTGREEN);
-        Print(L"%r", status);
-    }
-    SystemTable->ConOut->SetAttribute(SystemTable->ConOut, EFI_WHITE);
-    Print(L"]");
-}
-
-
-
-
-
-/* strncpyだが名前衝突のエラーがうっとおしいため */
-/* 参考にした場合のミスが目立つ場合戻すこと */
-void strncopy(unsigned short *dst, unsigned short *src, unsigned long long n) {
-    while (n--)
-        *dst++ = *src++;
-}
-
-/* while(1)で止めるのは気持ち悪いので */
-/* この関数を読み出すとCPUが休止モードになる */
-void hlt() {
-    while (1)
-        __asm__("hlt");
-}
-
-
-/* MikanOSのブートローダーより引用 */
-EFI_STATUS OpenRootDir(EFI_HANDLE image_handle, EFI_FILE_PROTOCOL **root) {
-    EFI_STATUS status;
-    EFI_LOADED_IMAGE_PROTOCOL *loaded_image;
-    EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *fs;
-    
-    
-    /* なぜはじめOpenVolumeでプロトコルを開けなかったか？ */
-    /* EFI_SIMPLE_FILE_SYSTEM_PROTOCOL
-     * *SFSPは取得していたが、GUIDを使ってプロトコルの先頭アドレスを割り当てていなかったためプロトコルが開けなかった。
-     */
-    /* ST->BootServices->LocateProtocol(&sfsp_guid, NULL, (void **)&SFSP); */
-    /* この処理が足りなかった */
-    
-    /* 自分自身へのイメージハンドルを取得している */
-    /* OpenProtocolに関しては、UEFI Spec 2.8B May 2020のP188を参照 */
-    /* これはHandleProtocolの拡張版 */
-    /* 指定されたプロトコルをサポートしているかを判定し、サポートしているようであればプロトコルをオープンにする
-     */
-    
-    /* 自身のハンドラを取得し */
-    status = gBS->OpenProtocol(image_handle, &gEfiLoadedImageProtocolGuid,
-                               (VOID **)&loaded_image, image_handle, NULL,
-                               EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
-    if (EFI_ERROR(status)) {
-        return status;
-    }
-    
-    /* EFI_SIMPLE_FILESYSTEM_PROTOCOLを取得する */
-    status = gBS->OpenProtocol(
-                               loaded_image->DeviceHandle, &gEfiSimpleFileSystemProtocolGuid,
-                               (VOID **)&fs, image_handle, NULL, EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
-    if (EFI_ERROR(status)) {
-        return status;
-    }
-    
-    return fs->OpenVolume(fs, root);
-}
 
 BOOLEAN is_exit = FALSE;
 /* EFI_HANDLE notifyHandle; */
@@ -187,14 +115,6 @@ key_notise(IN EFI_KEY_DATA *KeyData){
 /*     } */
 /*     return  retval; */
 /* } */
-
-/* フラグでStallを分岐する関数 */
-/* statusチェックで動かない際の動作がめんどくさいので後回し */
-void stall_branch(uint32_t boot_menu_index){
-    if (boot_menu_index == 1){
-        gST->BootServices->Stall(500000);
-    }
-}
 
 EFI_STATUS
 EFIAPI
@@ -352,7 +272,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     
     
     SystemTable->ConOut->ClearScreen(SystemTable->ConOut);
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     /* rootディレクトリの情報を読み出している */
     
     /* 12_04 Loacteタイプ--------------------------------------------- */
@@ -367,14 +287,15 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     /* -------------------------------------------------------- */
     
     status = OpenRootDir(ImageHandle, &root);
-    status_cheacker(SystemTable, status); /* statusチェック */
+    StatusCheacker(status); /* statusチェック */
+
     Print(L"    OpenRootDir\n");
     if (EFI_ERROR(status)) {
-        hlt();
+        Hlt();
     }
     
     /* SystemTable->BootServices->Stall(1000000); */
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     
     /* Rootでぃれくとりの表示 */
     Print(L"RootDirectory: ");
@@ -388,7 +309,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
         }
         
         file_info = (EFI_FILE_INFO *)file_buf;
-        strncopy(file_list[index].name, file_info->FileName, MAX_FILE_NAME_LEN - 1);
+        StrnCopy(file_list[index].name, file_info->FileName, MAX_FILE_NAME_LEN - 1);
         file_list[index].name[MAX_FILE_NAME_LEN - 1] = L'\0';
         Print(file_list[index].name);
         Print(L" ");
@@ -397,16 +318,16 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     
     Print(L"\n");
     
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     
     
-    status_cheacker(SystemTable, status); /* statusチェック */
+    StatusCheacker(status); /* statusチェック */
     Print(L"    Read status\n");
     if (EFI_ERROR(status)) {
-        hlt();
+        Hlt();
     }
     
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     
     
     /* 疑似シェルのlsコマンドとする場合等はCloseが必要となるが現状はファイル名を読み出したいだけであるためなし */
@@ -425,79 +346,78 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     Print(L"kernelfile is kernel.elf\n");
     status = root->Open(root, &kernel_file, L"\\kernel.elf", EFI_FILE_MODE_READ, 0); /* kernelのファイルを読み出す*/
     
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     
-    status_cheacker(SystemTable, status); /* statusチェック */
+    StatusCheacker(status); /* statusチェック */
     Print(L"    kernelfile open\n");
     if (EFI_ERROR(status)) {
-        hlt();
+        Hlt();
     }
     
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     
     VOID *kernel_buffer; /* kernelのバイナリ読み出し用 */
     UINTN kernel_file_info_size = sizeof(EFI_FILE_INFO) + sizeof(CHAR16) * 12;
     UINT8 kernel_file_info_buf[kernel_file_info_size];
     status = kernel_file->GetInfo(kernel_file, &gEfiFileInfoGuid,
                                   &kernel_file_info_size, kernel_file_info_buf);
-    status_cheacker(SystemTable, status); /* statusチェック */
+    StatusCheacker(status); /* statusチェック */
     Print(L"    Getinfo\n");
     if (EFI_ERROR(status)) {
-        hlt();
+        Hlt();
     }
     
     EFI_FILE_INFO *kerne_file_info = (EFI_FILE_INFO *)kernel_file_info_buf;
     UINTN kernel_file_size = kerne_file_info->FileSize;
     
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     
     status = gBS->AllocatePool(EfiLoaderData, kernel_file_size, (void **)&kernel_buffer);
-    status_cheacker(SystemTable, status); /* statusチェック */
+    StatusCheacker(status); /* statusチェック */
     Print(L"    AllocatePool\n");
     if (EFI_ERROR(status)) {
-        hlt();
+        Hlt();
     }
     
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     
     status = kernel_file->Read(kernel_file, &kernel_file_size, kernel_buffer);
     
-    status_cheacker(SystemTable, status); /* statusチェック */
+    StatusCheacker(status); /* statusチェック */
     Print(L"    kernelRead\n");
     if (EFI_ERROR(status)) {
-        hlt();
+        Hlt();
     }
     
     
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     
     uint8_t *kernele_buf_test = (uint8_t *)kernel_buffer;
     int i;
     Print(L"Magic Number:");
     for (i = 0; i < 16; i++) {
-        stall_branch(stall_flag);
+        StallBranch(stall_flag);
         Print(L"%02x ", kernele_buf_test[i]);
     }
     Print(L"\n");
     
     /* アドレスの計算を行う */
     Elf64_Ehdr *kernel_ehdr = (Elf64_Ehdr *)kernel_buffer;
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     
     Print(L"entrypoint address: ");
     Print(L"%08x\n", kernel_ehdr->e_entry);
     
     /* 以下にELF形式の */
     /* p_offsetを記載 */
-    
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     
     
     Print(L"programheader offset:");
     Print(L"%08x\n", kernel_ehdr->e_phoff);
     
     /* プログラムヘッダーのエントリの数 */
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     
     Print(L"programheader number:");
     Print(L"%08x\n", kernel_ehdr->e_phnum);
@@ -512,7 +432,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     kernel_first_address = MAX_UINT64;
     kernel_last_address = 0;
     
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     
     Print(L"PT_LOAD: %d\n", PT_LOAD);
     
@@ -527,7 +447,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     /* 必要なページの計算 */
     UINTN num_pages = (kernel_last_address - kernel_first_address + 0xfff) / 0x1000;
     
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     
     Print(L"num pages: %d\n", num_pages);
     
@@ -537,10 +457,10 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
                                 num_pages, &kernel_first_address);
     
     
-    status_cheacker(SystemTable, status); /* statusチェック */
+    StatusCheacker(status); /* statusチェック */
     Print(L"    allocate pages\n");
     if (EFI_ERROR(status)) {
-        hlt();
+        Hlt();
     }
     
     /* セグメントコピーの開始 */
@@ -560,9 +480,9 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
         SetMem((VOID *)(phdr_copy_seg[i].p_vaddr + phdr_copy_seg[i].p_filesz), remain_byte, 0);
     }
     
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     Print(L"kernel first address:  %08x\n", kernel_first_address);
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     Print(L"kernel last address:  %08x\n", kernel_last_address);
     
     
@@ -573,11 +493,11 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     /* ===================================================================================== */
     /* カーネルの情報を読み出すために使用したメモリ上の一時領域を開放する */
     status = SystemTable->BootServices->FreePool(kernel_buffer);
-    stall_branch(stall_flag);
-    status_cheacker(SystemTable, status);
+    StallBranch(stall_flag);
+    StatusCheacker(status);
     Print(L"    free pool\n");
     if (EFI_ERROR(status)) {
-        hlt();
+        Hlt();
     }
     
     
@@ -599,9 +519,9 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
                                                            NULL,
                                                            &num_gop_handles,
                                                            &gop_handles);
-    status_cheacker(SystemTable, status);
+    StatusCheacker(status);
     Print(L"GOP LocateHandleBuffer\n");
-    stall_branch(stall_flag);
+    StallBranch(stall_flag);
     
     
     
@@ -611,7 +531,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
                                                      ImageHandle,
                                                      NULL,
                                                      EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
-    status_cheacker(SystemTable, status);
+    StatusCheacker(status);
     Print(L"GOP OpenProtocol\n");
     FreePool(gop_handles);		/* この処理が何なのかが気になる */
     
@@ -654,15 +574,18 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
         status = EFI_BUFFER_TOO_SMALL;
         
         
-        stall_branch(stall_flag);
+        StallBranch(stall_flag);
         
-        
-        status_cheacker(SystemTable, status);
+
+        StatusCheacker(status);
         Print(L"    GetMemoryMap\n");
         if (EFI_ERROR(status)) {
-            hlt();
+            Hlt();
         }
     }
+
+
+    /* wcat_boot_information.kernel_runtime_service = (KERNEL_EFI_RUNTIME_SERVICE*)gRT; */
     
     map.map_size = map.buffer_size;
     
@@ -694,7 +617,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
             SystemTable->ConOut->SetAttribute(SystemTable->ConOut, EFI_WHITE);
             Print(L"]    GetMemoryMap\n");
             if (EFI_ERROR(status)) {
-                hlt();
+                Hlt();
             }
         }
         Print(L"Second ExitBootServices start");
@@ -732,9 +655,9 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     /* ELFの24に関しては以下を参照 */
     /* https://wiki.osdev.org/ELF */
 #define PROGRAM_ENTRY_POSION_OFFSET 24 /* magic number対策 */
+
     UINT64 entry_addr = *(UINT64*)(kernel_first_address + PROGRAM_ENTRY_POSION_OFFSET);
     typedef void EntryPointType(const struct WCAT_HEADER*);
-
     EntryPointType* entry_point = (EntryPointType*)entry_addr;
     entry_point(&wcat_boot_information);
 
@@ -742,6 +665,6 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
         EFI_SUCCESS;
     }
 
-    hlt();
+    Hlt();
     return 0;
 }
