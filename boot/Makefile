@@ -17,5 +17,5 @@ default:
 	echo $(EDK_WORKSPACE)
 	ln -sf $(ROOTDIR)/boot/WcatBootPkg $(EDK_WORKSPACE)
 	cd ${EDK_WORKSPACE}; source edksetup.sh --reconfig;\
-	build -p WcatBootPkg/WcatBoot.dsc -b RELEASE -a X64 -t CLANG38
+	build -p WcatBootPkg/WcatBoot.dsc -b RELEASE -a X64 -t CLANG38 -n 4
 
