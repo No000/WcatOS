@@ -11,10 +11,12 @@
 
 
 #include <stdint.h>
-#include <wchar.h>
+
 #include "graphic.h"
 #include "font.h"
 
+#define FONT_HEIGHT 10
+#define FONT_WIDTH 8
 
 color BLACK = {0x00, 0x00, 0x00};
 
@@ -49,7 +51,7 @@ uint32_t cursor_x = 0;
 uint32_t cursor_y = 0;
 
 
-void print_char(wchar_t c, VIDEO_INFO video_info, color pixel_color) {
+void print_char(char c, VIDEO_INFO video_info, color pixel_color) {
   int x = 0, y = 0;
   /* 実験なのでインデックスは0固定 */
   for (y = 0; y < FONT_HEIGHT; y++) {
@@ -68,7 +70,7 @@ void print_char(wchar_t c, VIDEO_INFO video_info, color pixel_color) {
   }
 }
 
-void print_string(wchar_t *string, VIDEO_INFO vudeo_info, color pixel_color) {
+void print_string(char *string, VIDEO_INFO vudeo_info, color pixel_color) {
   int i = 0;
   while (string[i] != '\0') {
 	print_char(string[i], vudeo_info, pixel_color);
@@ -79,7 +81,7 @@ void print_string(wchar_t *string, VIDEO_INFO vudeo_info, color pixel_color) {
 //16進数からASCIIコードに変換
 uint64_t hex2asc (char *str, uint64_t dec) {
     uint64_t len = 0, len_buf;
-    wchar_t buf[16];
+    char buf[16];
     while (1) {
         buf[len++] = dec % 16;
         if (dec < 16) break;
@@ -130,7 +132,7 @@ uint64_t bin2asc(char *str, uint64_t bin){
 void print_test(uint64_t i_i, VIDEO_INFO video_info, color pixel_color){
     char s[MAX64_DIGIT];
     uint64_t len;
-    len = dec2asc(s, i_i);
+    len = hex2asc(s, i_i);
     for (int i = 0; i < len; i++) {
         print_char(s[i], video_info, pixel_color);
     }
@@ -162,13 +164,18 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   /* print_char('-', *video_infomation); */
   /* print_char('A', *video_infomation); */
 
-  uint64_t test_val = 0xabc;
+  uint64_t test_val = 10;
+
   /* print_string("!\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", wcat_boot_information->video_information, BLACK); */
   print_test(test_val, wcat_boot_information->video_information, BLACK);
 
   print_test(wcat_boot_information->video_information.horizen_size, wcat_boot_information->video_information, BLACK);
-  print_char('\n', wcat_boot_information->video_information, BLACK);
-  print_test(wcat_boot_information->video_information.vertical_size, wcat_boot_information->video_information, BLACK);
+  print_char(' ', wcat_boot_information->video_information, BLACK);
+
+
   while (1)
     hlt();
 }
+
+#undef FONT_HEIGHT
+#undef FONT_WIDTH
