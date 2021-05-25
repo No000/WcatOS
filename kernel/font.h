@@ -1167,4 +1167,7 @@ static const uint8_t font_bitmap[][FONT_HEIGHT][FONT_WIDTH] = {
 	},
 };
 
+#undef FONT_HEIGHT
+#undef FONT_WIDTH
+
 #endif
