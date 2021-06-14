@@ -1,7 +1,6 @@
 -nostdlibinc
 -std=c17
 -fno-exceptions
--I../../../tool/edk2/MdePkg/Include
--I../../../tool/edk2/MdePkg/Include/X64
 -Wno-incompatible-pointer-types
 -fms-extensions
+-ffreestanding

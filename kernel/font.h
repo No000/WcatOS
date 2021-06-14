@@ -16,6 +16,8 @@
 		{0,0,0,0,0,0,0,0},
 		{0,0,0,0,0,0,0,0}
 	}, */
+#ifndef _FONT_H_
+#define _FONT_H_
 #include <stdint.h>
 
 #define FONT_HEIGHT 10
@@ -1164,3 +1166,8 @@ static const uint8_t font_bitmap[][FONT_HEIGHT][FONT_WIDTH] = {
 		{0,0,0,0,0,0,0,0}
 	},
 };
+
+#undef FONT_HEIGHT
+#undef FONT_WIDTH
+
+#endif

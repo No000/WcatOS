@@ -10,6 +10,7 @@
   WcatBoot.c
   smbios.c
   menu.c
+  util.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -28,3 +29,6 @@
   gEfiLoadFileProtocolGuid
   gEfiSimpleFileSystemProtocolGuid
   gEfiBlockIoProtocolGuid
+
+[BuildOptions]
+  *_*_X64_CC_FLAGS = -fms-extensions

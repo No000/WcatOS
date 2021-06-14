@@ -1,0 +1,4 @@
+* [BuildOptions]
+ビルド時のフラグを指定できる。
+フォーマット
+ <TARGET>_<TOOLCHAIN>_<ARCH>_<TOOL>_FLAGS

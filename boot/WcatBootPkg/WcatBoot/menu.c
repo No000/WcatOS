@@ -5,8 +5,14 @@
 #include <stdint.h>
 
 
+
 #define PRIVATE static
 #define PUBLIC
+
+typedef struct MENU_FLAG{
+    uint32_t boot_process_start_flag;
+    uint32_t menu_shutdown_flag;
+}MENU_FLAG;
 
 PRIVATE EFI_INPUT_KEY efi_wait_any_key();
 PRIVATE VOID stall(uint32_t microseconds);
@@ -14,17 +20,25 @@ PRIVATE VOID logo_print();
 PRIVATE VOID menu_init(uint32_t cursor_x, uint32_t cursor_y);
 PRIVATE VOID set_cursor(uint32_t cursor_x, uint32_t cursor_y);
 PRIVATE VOID clear();
-PRIVATE EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data, uint32_t menu_number, uint32_t* boot_menu_index);
+PRIVATE EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data,
+                                    uint32_t menu_number,
+                                    uint32_t* boot_menu_index);
 PRIVATE VOID shutdown_menu();
+PRIVATE VOID boot_menu_flag_init(MENU_FLAG* menu_flag);
+PRIVATE VOID boot_process_enable(MENU_FLAG* menu_flag);
+PRIVATE VOID boot_process_disable(MENU_FLAG* menu_flag);
+PRIVATE VOID menu_shutdown_enabel(MENU_FLAG* menu_flag);
+PRIVATE VOID menu_shutdown_disable(MENU_FLAG* menu_flag);
+
 
 PUBLIC VOID boot_menu(uint32_t* stall_flag){
     clear();
     logo_print();
     menu_init(0, 18);
     EFI_INPUT_KEY result_key_data = {0, 0};
+    MENU_FLAG menu_flag;
+    boot_menu_flag_init(&menu_flag);
     uint32_t boot_menu_index = 0;
-    uint32_t boot_process_start_flag = 0;
-    uint32_t menu_shutdown_flag = 0;
     for(;;) {
         /* result_key_dataとboot_menu_indexは、構造体でまとめても良かったのですが */
         /* グローバル変数が増えるのが嫌だったので、ポインタ渡しで実装 */
@@ -41,7 +55,8 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
             Print(L"     ");
             set_cursor(0, 21);
             Print(L"     ");
-            boot_process_start_flag = 1;
+            boot_process_enable(&menu_flag);
+            menu_shutdown_disable(&menu_flag);
             *stall_flag = 0;
             break;
         case 1:
@@ -53,7 +68,8 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
             Print(L"     ");
             set_cursor(0, 21);
             Print(L"     ");
-            boot_process_start_flag = 1;
+            boot_process_enable(&menu_flag);
+            menu_shutdown_disable(&menu_flag);
             *stall_flag = 1;
             break;
         case 2:
@@ -65,7 +81,8 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
             Print(L">    ");
             set_cursor(0, 21);
             Print(L"     ");
-            boot_process_start_flag = 0;
+            boot_process_disable(&menu_flag);
+            menu_shutdown_disable(&menu_flag);
             break;
         case 3:
             set_cursor(0, 18);
@@ -76,18 +93,40 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
             Print(L"     ");
             set_cursor(0, 21);
             Print(L">    ");
-            boot_process_start_flag = 0;
-            menu_shutdown_flag = 1;
+            boot_process_disable(&menu_flag);
+            menu_shutdown_enabel(&menu_flag);
             break;
         }
-        if (result_key_data.UnicodeChar == '\r' && boot_process_start_flag == 1){
+        if (result_key_data.UnicodeChar == '\r' && menu_flag.boot_process_start_flag == 1){
             return;
-        } else if (result_key_data.UnicodeChar == '\r' && menu_shutdown_flag == 1){
+        } else if (result_key_data.UnicodeChar == '\r' && menu_flag.menu_shutdown_flag == 1){
             shutdown_menu();
             return;
         }
     }
 }
+
+PRIVATE VOID menu_shutdown_disable(MENU_FLAG* menu_flag){
+    menu_flag->menu_shutdown_flag = 0;
+}
+
+PRIVATE VOID menu_shutdown_enabel(MENU_FLAG* menu_flag){
+    menu_flag->menu_shutdown_flag = 1;
+}
+
+PRIVATE VOID boot_process_disable(MENU_FLAG* menu_flag){
+    menu_flag->boot_process_start_flag = 0;
+}
+
+PRIVATE VOID boot_process_enable(MENU_FLAG* menu_flag){
+    menu_flag->boot_process_start_flag = 1;
+}
+
+PRIVATE VOID boot_menu_flag_init(MENU_FLAG* menu_flag){
+    menu_flag->boot_process_start_flag = 0;
+    menu_flag->menu_shutdown_flag = 0;
+}
+
 
 PRIVATE VOID shutdown_menu(){
     gRT->ResetSystem(EfiResetShutdown, 0, 0, "shutdown");
