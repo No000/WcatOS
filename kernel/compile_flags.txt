@@ -3,3 +3,4 @@
 -fno-exceptions
 -Wno-incompatible-pointer-types
 -fms-extensions
+-ffreestanding

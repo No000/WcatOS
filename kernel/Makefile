@@ -36,7 +36,13 @@ kernel.o: kernel.c font.h
 graphic.o: graphic.c graphic.h
 	$(CC) $(CFLAGS) -c $<
 
-kernel.elf: kernel.o graphic.o
+print.o: print.c print.h
+	$(CC) $(CFLAGS) -c $<
+
+io.o: io.c io.h
+	$(CC) $(CFLAGS) -c $<
+
+kernel.elf: kernel.o graphic.o print.o io.o
 	$(LD) $(LDFLAGS) -o $@ $^
 
 clean:

@@ -50,15 +50,15 @@ tool:
 	cp $(CURDIR)/tool/edk2/Build/OvmfX64/RELEASE_CLANG38/FV/OVMF_VARS.fd ./tool/OVMF/
 
 setup:
-	make tool
+	$(MAKE) tool
 
 all:
-	make boot
-	make kernel
-	make run
+	$(MAKE) boot
+	$(MAKE) kernel
+	$(MAKE) run
 
 clean:
-	make -C boot/ clean
-	make -C kernel/ clean
+	$(MAKE) -C boot/ clean
+	$(MAKE) -C kernel/ clean
 	$(RM) test/kernel.elf
 	$(RM) test/EFI/BOOT/BOOTX64.EFI
