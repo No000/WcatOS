@@ -9,10 +9,12 @@
 #define PRIVATE static
 #define PUBLIC
 
-typedef struct MENU_FLAG{
+/* menu関連の情報（menuが何行から始まるか、menuが何個あるかなどの情報を記載） */
+/* menuの数は関数が何回呼び出されたかでカウント */
+typedef struct MENU_INFORMATION{
     uint32_t boot_process_start_flag;
     uint32_t menu_shutdown_flag;
-}MENU_FLAG;
+}MENU_INFORMATION;
 
 PRIVATE EFI_INPUT_KEY efi_wait_any_key();
 PRIVATE VOID stall(uint32_t microseconds);
@@ -24,11 +26,11 @@ PRIVATE EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data,
                                     uint32_t menu_number,
                                     uint32_t* boot_menu_index);
 PRIVATE VOID shutdown_menu();
-PRIVATE VOID boot_menu_flag_init(MENU_FLAG* menu_flag);
-PRIVATE VOID boot_process_enable(MENU_FLAG* menu_flag);
-PRIVATE VOID boot_process_disable(MENU_FLAG* menu_flag);
-PRIVATE VOID menu_shutdown_enabel(MENU_FLAG* menu_flag);
-PRIVATE VOID menu_shutdown_disable(MENU_FLAG* menu_flag);
+PRIVATE VOID boot_menu_flag_init(MENU_INFORMATION* menu_information);
+PRIVATE VOID boot_process_enable(MENU_INFORMATION* menu_information);
+PRIVATE VOID boot_process_disable(MENU_INFORMATION* menu_information);
+PRIVATE VOID menu_shutdown_enabel(MENU_INFORMATION* menu_information);
+PRIVATE VOID menu_shutdown_disable(MENU_INFORMATION* menu_information);
 
 
 PUBLIC VOID boot_menu(uint32_t* stall_flag){
@@ -36,8 +38,8 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
     logo_print();
     menu_init(0, 18);
     EFI_INPUT_KEY result_key_data = {0, 0};
-    MENU_FLAG menu_flag;
-    boot_menu_flag_init(&menu_flag);
+    PRIVATE MENU_INFORMATION menu_information;
+    boot_menu_flag_init(&menu_information);
     uint32_t boot_menu_index = 0;
     for(;;) {
         /* result_key_dataとboot_menu_indexは、構造体でまとめても良かったのですが */
@@ -45,6 +47,7 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
         result_key_data = menu_sentinel(result_key_data, 3, &boot_menu_index);
 
         /* case内のカーソルの位置とメニューの数を渡せば勝手に描画を行ってくれる関数を記載する */
+        /* case 内の関数に文字列を渡すことにより、それがmenuの表示になる */
         switch (boot_menu_index) {
         case 0:
             set_cursor(0, 18);
@@ -55,8 +58,8 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
             Print(L"     ");
             set_cursor(0, 21);
             Print(L"     ");
-            boot_process_enable(&menu_flag);
-            menu_shutdown_disable(&menu_flag);
+            boot_process_enable(&menu_information);
+            menu_shutdown_disable(&menu_information);
             *stall_flag = 0;
             break;
         case 1:
@@ -68,8 +71,8 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
             Print(L"     ");
             set_cursor(0, 21);
             Print(L"     ");
-            boot_process_enable(&menu_flag);
-            menu_shutdown_disable(&menu_flag);
+            boot_process_enable(&menu_information);
+            menu_shutdown_disable(&menu_information);
             *stall_flag = 1;
             break;
         case 2:
@@ -81,8 +84,8 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
             Print(L">    ");
             set_cursor(0, 21);
             Print(L"     ");
-            boot_process_disable(&menu_flag);
-            menu_shutdown_disable(&menu_flag);
+            boot_process_disable(&menu_information);
+            menu_shutdown_disable(&menu_information);
             break;
         case 3:
             set_cursor(0, 18);
@@ -93,38 +96,38 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
             Print(L"     ");
             set_cursor(0, 21);
             Print(L">    ");
-            boot_process_disable(&menu_flag);
-            menu_shutdown_enabel(&menu_flag);
+            boot_process_disable(&menu_information);
+            menu_shutdown_enabel(&menu_information);
             break;
         }
-        if (result_key_data.UnicodeChar == '\r' && menu_flag.boot_process_start_flag == 1){
+        if (result_key_data.UnicodeChar == '\r' && menu_information.boot_process_start_flag == 1){
             return;
-        } else if (result_key_data.UnicodeChar == '\r' && menu_flag.menu_shutdown_flag == 1){
+        } else if (result_key_data.UnicodeChar == '\r' && menu_information.menu_shutdown_flag == 1){
             shutdown_menu();
             return;
         }
     }
 }
 
-PRIVATE VOID menu_shutdown_disable(MENU_FLAG* menu_flag){
-    menu_flag->menu_shutdown_flag = 0;
+PRIVATE VOID menu_shutdown_disable(MENU_INFORMATION* menu_information){
+    menu_information->menu_shutdown_flag = 0;
 }
 
-PRIVATE VOID menu_shutdown_enabel(MENU_FLAG* menu_flag){
-    menu_flag->menu_shutdown_flag = 1;
+PRIVATE VOID menu_shutdown_enabel(MENU_INFORMATION* menu_information){
+    menu_information->menu_shutdown_flag = 1;
 }
 
-PRIVATE VOID boot_process_disable(MENU_FLAG* menu_flag){
-    menu_flag->boot_process_start_flag = 0;
+PRIVATE VOID boot_process_disable(MENU_INFORMATION* menu_information){
+    menu_information->boot_process_start_flag = 0;
 }
 
-PRIVATE VOID boot_process_enable(MENU_FLAG* menu_flag){
-    menu_flag->boot_process_start_flag = 1;
+PRIVATE VOID boot_process_enable(MENU_INFORMATION* menu_information){
+    menu_information->boot_process_start_flag = 1;
 }
 
-PRIVATE VOID boot_menu_flag_init(MENU_FLAG* menu_flag){
-    menu_flag->boot_process_start_flag = 0;
-    menu_flag->menu_shutdown_flag = 0;
+PRIVATE VOID boot_menu_flag_init(MENU_INFORMATION* menu_information){
+    menu_information->boot_process_start_flag = 0;
+    menu_information->menu_shutdown_flag = 0;
 }
 
 
@@ -227,7 +230,7 @@ PRIVATE VOID logo_print(){
     gST->ConOut->SetCursorPosition(gST->ConOut, 0, 10); /* QueryMode()でカーソルの位置を指定するAPI */
     Print(L"                                                               \n");
     stall(100000);
-    gST->ConOut->SetCursorPosition(gST->ConOut, 0, 11); /* QueryMode()でカーソルの位置を指定するAPI */
+    gST->ConOut->SetCursorPosition(gST->ConOut, 0, 11); /* QueryMode()でカーソルの位置をq指定するAPI */
     Print(L"                                                               \n");
     stall(100000);
 }
