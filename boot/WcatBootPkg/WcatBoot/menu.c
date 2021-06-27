@@ -14,6 +14,8 @@
 typedef struct MENU_INFORMATION{
     uint32_t boot_process_start_flag;
     uint32_t menu_shutdown_flag;
+    uint64_t count;             /* menuの個数を記録 */
+    uint32_t startcurser_place; /* menuが何行から始まるかを記録 */
 }MENU_INFORMATION;
 
 PRIVATE EFI_INPUT_KEY efi_wait_any_key();
