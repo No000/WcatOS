@@ -24,7 +24,6 @@ git clone https://github.com/No000/WcatOS.git --recursive
 
 次に、tool/edk2/に移動し、以下のコマンドを叩く
 #+BEGIN_SRC shell
-git submodule update --init
 make -C BaseTools/Source/C
 #+END_SRC
 以上でセットアップ完了である。
