@@ -28,11 +28,13 @@ PRIVATE EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data,
                                     uint32_t menu_number,
                                     uint32_t* boot_menu_index);
 PRIVATE VOID shutdown_menu();
+PRIVATE VOID draw_menu(const MENU_INFORMATION* menu_information, CHAR16* menu_string);
 PRIVATE VOID boot_menu_flag_init(MENU_INFORMATION* menu_information);
 PRIVATE VOID boot_process_enable(MENU_INFORMATION* menu_information);
 PRIVATE VOID boot_process_disable(MENU_INFORMATION* menu_information);
 PRIVATE VOID menu_shutdown_enabel(MENU_INFORMATION* menu_information);
 PRIVATE VOID menu_shutdown_disable(MENU_INFORMATION* menu_information);
+
 
 
 PUBLIC VOID boot_menu(uint32_t* stall_flag){
@@ -62,7 +64,7 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
             Print(L"     ");
             boot_process_enable(&menu_information);
             menu_shutdown_disable(&menu_information);
-            *stall_flag = 0;
+            *stall_flag = 0;    /* stall_flagに関してはsetting_menuで変更したいので、別の構造体を利用する */
             break;
         case 1:
             set_cursor(0, 18);
@@ -111,6 +113,8 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
     }
 }
 
+/* menuを追加する関数には、menuの名前、上からの順番を記載 */
+
 PRIVATE VOID menu_shutdown_disable(MENU_INFORMATION* menu_information){
     menu_information->menu_shutdown_flag = 0;
 }
@@ -139,6 +143,7 @@ PRIVATE VOID shutdown_menu(){
     return;
 }
 
+/* menuを選択する際、カーソルの位置を調整する関数 */
 PRIVATE EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data, uint32_t menu_number, uint32_t* boot_menu_index){
         key_data = efi_wait_any_key();
         if (key_data.ScanCode == 0x01 && *boot_menu_index != 0) {
