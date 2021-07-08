@@ -15,6 +15,7 @@ typedef struct MENU_INFORMATION{
     uint32_t boot_process_start_flag;
     uint32_t menu_shutdown_flag;
     uint64_t count;             /* menuの個数を記録 */
+    uint64_t now_cursor_place;    /* 現在どこにカーソルがあるか */
     uint32_t startcurser_place; /* menuが何行から始まるかを記録 */
 }MENU_INFORMATION;
 
@@ -28,7 +29,6 @@ PRIVATE EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data,
                                     uint32_t menu_number,
                                     uint32_t* boot_menu_index);
 PRIVATE VOID shutdown_menu();
-PRIVATE VOID draw_menu(const MENU_INFORMATION* menu_information, CHAR16* menu_string);
 PRIVATE VOID boot_menu_flag_init(MENU_INFORMATION* menu_information);
 PRIVATE VOID boot_process_enable(MENU_INFORMATION* menu_information);
 PRIVATE VOID boot_process_disable(MENU_INFORMATION* menu_information);
@@ -54,6 +54,7 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
         /* case 内の関数に文字列を渡すことにより、それがmenuの表示になる */
         switch (boot_menu_index) {
         case 0:
+            /* logoに関しては今何ケース目かに関する情報を引数にした関数を渡す、それを元にカーソルとその上と下を空白で上書きする */
             set_cursor(0, 18);
             Print(L">    ");
             set_cursor(0, 19);
@@ -113,7 +114,10 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
     }
 }
 
-/* menuを追加する関数には、menuの名前、上からの順番を記載 */
+
+
+
+
 
 PRIVATE VOID menu_shutdown_disable(MENU_INFORMATION* menu_information){
     menu_information->menu_shutdown_flag = 0;
@@ -156,6 +160,15 @@ PRIVATE EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data, uint32_t menu_number
 
 PRIVATE VOID clear(){
     gST->ConOut->ClearScreen(gST->ConOut);
+    /* gst->ConOut->SetAttribute(gST->ConOut, 0x10); */
+
+    UINTN height = 0;
+    UINTN width = 0;
+    gST->ConOut->QueryMode(gST->ConOut, gST->ConOut->Mode->Mode, &width, &height);
+    Print(L"%d\n", height);
+    Print(L"%d\n", width);
+    
+
 }
 
 PRIVATE VOID set_cursor(uint32_t cursor_x, uint32_t cursor_y){
@@ -163,8 +176,8 @@ PRIVATE VOID set_cursor(uint32_t cursor_x, uint32_t cursor_y){
 }
 
 PRIVATE VOID menu_init(uint32_t cursor_x, uint32_t cursor_y){
-    set_cursor(cursor_x, cursor_y);
-    Print(L">    develop boot");
+    set_cursor(cursor_x + 5, cursor_y);
+    Print(L"develop boot");
     set_cursor(cursor_x + 5, ++cursor_y);
     Print(L"normal  boot");
     set_cursor(cursor_x + 5, ++cursor_y);
