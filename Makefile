@@ -29,6 +29,10 @@ OVMF = $(ROOTDIR)/tool/OVMF/OVMF.fd
 EDK_WORKSPACE = $(ROOTDIR)/tool/edk2
 
 # default:
+all:
+	$(MAKE) boot
+	$(MAKE) kernel
+	$(MAKE) run
 
 boot:
 	$(MAKE) -C boot
@@ -52,10 +56,7 @@ tool:
 setup:
 	$(MAKE) tool
 
-all:
-	$(MAKE) boot
-	$(MAKE) kernel
-	$(MAKE) run
+
 
 clean:
 	$(MAKE) -C boot/ clean
