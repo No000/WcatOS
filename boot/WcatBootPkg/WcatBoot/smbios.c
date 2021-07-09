@@ -2,6 +2,7 @@
 #include  <Guid/SmBios.h>                       /* SMBIOS */
 #include  <IndustryStandard/SmBios.h>
 #include  <Library/UefiBootServicesTableLib.h> /* gST */
+#include "smbios.h"
 
 #define PRIVATE static
 #define PUBLIC
