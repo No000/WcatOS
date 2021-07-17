@@ -9,7 +9,8 @@
 [Sources]
   WcatBoot.c
   smbios.c
-  menu.c
+  menu/menu.c
+  menu/menuLib.c
   util.c
 
 [Packages]

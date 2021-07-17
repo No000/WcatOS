@@ -82,6 +82,3 @@ PUBLIC void *find_efi_smbios_table(void) {
 
 
 
-
-#undef PUBLIC
-#undef PRIVATE

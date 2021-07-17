@@ -12,7 +12,7 @@
 /* 数値の出力にはEFI_LIGHTCYANでシアン色に変更することにする */
 
 #include "elf_header.h"
-#include "menu.h"
+#include "menu/menu.h"
 #include "smbios.h"
 #include "wcat_boot_header.h"
 
