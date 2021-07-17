@@ -6,21 +6,19 @@
 #include "menu.h"
 #include "menuLib.h"
 
-
-
-#define PRIVATE static
-#define PUBLIC
+#include "settings_menu/settings_menu.h"
 
 
 
-PUBLIC VOID boot_menu(uint32_t* stall_flag){
+
+VOID boot_menu(uint32_t* stall_flag){
     clear();
     logo_print();
     /* init処理をまとめる */
     menu_init(18);
     cursor_init(18);
     EFI_INPUT_KEY result_key_data = {0, 0};
-    PRIVATE MENU_INFORMATION menu_information;
+    MENU_INFORMATION menu_information;
     boot_menu_flag_init(&menu_information);
     uint32_t boot_menu_index = 0;
     for(;;) {
@@ -62,13 +60,14 @@ PUBLIC VOID boot_menu(uint32_t* stall_flag){
             shutdown_enabel(&menu_information);
             break;
         }
-        if (result_key_data.UnicodeChar == '\r' && menu_information.boot_process_start_flag == 1){
+        if (result_key_data.UnicodeChar == '\r' && menu_information.boot_process_start_flag == 1){ /* ここ、enumと関数使えばまとめられないかな */
             return;
         } else if (result_key_data.UnicodeChar == '\r' && menu_information.menu_shutdown_flag == 1){
             shutdown();
             return;             /* ここにはこない */
         } else if (result_key_data.UnicodeChar == '\r' && menu_information.settings_menu_flag == 1){
             /* settings_menu=================================================== */
+            settings_menu();
         }
     }
 }
