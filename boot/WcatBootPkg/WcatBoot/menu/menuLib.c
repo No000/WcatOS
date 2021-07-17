@@ -11,11 +11,15 @@
 #define PRIVATE static
 #define PUBLIC
 
-PUBLIC VOID menu_shutdown_disable(MENU_INFORMATION* menu_information){
+PUBLIC VOID shutdown_disable(MENU_INFORMATION* menu_information){
     menu_information->menu_shutdown_flag = 0;
 }
 
-PUBLIC VOID menu_shutdown_enabel(MENU_INFORMATION* menu_information){
+PUBLIC VOID settings_menu_enable(MENU_INFORMATION *menu_information){
+    menu_information->settings_menu_flag = 1;
+}
+
+PUBLIC VOID shutdown_enabel(MENU_INFORMATION* menu_information){
     menu_information->menu_shutdown_flag = 1;
 }
 
@@ -30,10 +34,11 @@ PUBLIC VOID boot_process_enable(MENU_INFORMATION* menu_information){
 PUBLIC VOID boot_menu_flag_init(MENU_INFORMATION* menu_information){
     menu_information->boot_process_start_flag = 0;
     menu_information->menu_shutdown_flag = 0;
+    menu_information->settings_menu_flag = 0;
 }
 
 
-PUBLIC VOID shutdown_menu(){
+PUBLIC VOID shutdown(){
     gRT->ResetSystem(EfiResetShutdown, 0, 0, "shutdown");
     CpuDeadLoop();
     return;
@@ -74,6 +79,8 @@ PUBLIC VOID menu_init(uint32_t cursor_y){
     Print(L"normal  boot");
     set_cursor(CURSOR_INIT_X + 5, ++cursor_y);
     Print(L"information");
+    set_cursor(CURSOR_INIT_X + 5, ++cursor_y);
+    Print(L"settings");
     set_cursor(CURSOR_INIT_X + 5, ++cursor_y);
     Print(L"shutdown");
 }

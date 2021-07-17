@@ -14,6 +14,7 @@ typedef struct MENU_INFORMATION{
     uint64_t count;             /* menuの個数を記録 */
     uint64_t now_cursor_place;    /* 現在どこにカーソルがあるか */
     uint32_t startcurser_place; /* menuが何行から始まるかを記録 */
+    uint32_t settings_menu_flag;
 }MENU_INFORMATION;
 
 EFI_INPUT_KEY efi_wait_any_key();
@@ -27,11 +28,12 @@ VOID clear();
 EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data,
                                     uint32_t menu_number,
                                     uint32_t* boot_menu_index);
-VOID shutdown_menu();
+VOID shutdown();
 VOID boot_menu_flag_init(MENU_INFORMATION* menu_information);
 VOID boot_process_enable(MENU_INFORMATION* menu_information);
 VOID boot_process_disable(MENU_INFORMATION* menu_information);
-VOID menu_shutdown_enabel(MENU_INFORMATION* menu_information);
-VOID menu_shutdown_disable(MENU_INFORMATION* menu_information);
+VOID shutdown_enabel(MENU_INFORMATION* menu_information);
+VOID shutdown_disable(MENU_INFORMATION* menu_information);
+VOID settings_menu_enable(MENU_INFORMATION* menu_information);
 
 #endif
