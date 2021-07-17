@@ -11,6 +11,7 @@
   smbios.c
   menu/menu.c
   menu/menuLib.c
+  menu/settings_menu/settings_menu.c
   util.c
 
 [Packages]
