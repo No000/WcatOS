@@ -5,10 +5,24 @@
 #include "settings_menu.h"
 
 
+
+
 VOID settings_menu(){
+    gST->ConOut->ClearScreen(gST->ConOut);
     UINTN height = 0;
     UINTN width = 0;
-    gST->ConOut->QueryMode(gST->ConOut, gST->ConOut->Mode->Mode, &width, &height);
+    INTN i;
+    INTN j;
+    EFI_STATUS a1;
+    a1 = gST->ConOut->QueryMode(gST->ConOut, gST->ConOut->Mode->Mode, &width, &height);
+    /* setcursorpositionは意外と処理が遅いので、Printを複数回するほうがいいっぽい */
+    gST->ConOut->SetAttribute(gST->ConOut, EFI_BACKGROUND_GREEN);
+    for (i = 0; i < height; i++) {
+        gST->ConOut->SetCursorPosition(gST->ConOut, j, i);
+        for (j = 0; j < width; j++) {
+            Print(L" ");
+        }
+    }
     while (1);
     return;
 }
