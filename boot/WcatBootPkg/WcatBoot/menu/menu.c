@@ -8,7 +8,10 @@
 
 #include "settings_menu/settings_menu.h"
 
-
+/* menuの追加方法 */
+/* (1)PUBLIC VOID menu_init(uint32_t cursor_y)関数にメニュー名を記載 */
+/* (2)switch文の中に追加 */
+/* (3)最後のif文にフラグで分岐する、実行したい関数を記載 */
 
 
 VOID boot_menu(uint32_t* stall_flag){
