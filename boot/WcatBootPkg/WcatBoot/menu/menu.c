@@ -38,18 +38,21 @@ VOID boot_menu(uint32_t* stall_flag){
             cursor_print(18);
             boot_process_enable(&menu_information);
             shutdown_disable(&menu_information);
+            settings_menu_disable(&menu_information);
             *stall_flag = 0;    /* stall_flagに関してはsetting_menuで変更したいので、別の構造体を利用する */
             break;
         case 1:
             cursor_print(19);
             boot_process_enable(&menu_information);
             shutdown_disable(&menu_information);
+            settings_menu_disable(&menu_information);
             *stall_flag = 1;
             break;
         case 2:
             cursor_print(20);
             boot_process_disable(&menu_information);
             shutdown_disable(&menu_information);
+            settings_menu_disable(&menu_information);
             break;
         case 3:
             cursor_print(21);
@@ -61,6 +64,7 @@ VOID boot_menu(uint32_t* stall_flag){
             cursor_print(22);
             boot_process_disable(&menu_information);
             shutdown_enabel(&menu_information);
+            settings_menu_disable(&menu_information);
             break;
         }
         if (result_key_data.UnicodeChar == '\r' && menu_information.boot_process_start_flag == 1){ /* ここ、enumと関数使えばまとめられないかな */

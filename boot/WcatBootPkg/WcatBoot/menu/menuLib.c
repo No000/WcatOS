@@ -19,6 +19,11 @@ PUBLIC VOID settings_menu_enable(MENU_INFORMATION *menu_information){
     menu_information->settings_menu_flag = 1;
 }
 
+PUBLIC VOID settings_menu_disable(MENU_INFORMATION *menu_information){
+    menu_information->settings_menu_flag = 0;
+}
+
+
 PUBLIC VOID shutdown_enabel(MENU_INFORMATION* menu_information){
     menu_information->menu_shutdown_flag = 1;
 }

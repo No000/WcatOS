@@ -35,5 +35,6 @@ VOID boot_process_disable(MENU_INFORMATION* menu_information);
 VOID shutdown_enabel(MENU_INFORMATION* menu_information);
 VOID shutdown_disable(MENU_INFORMATION* menu_information);
 VOID settings_menu_enable(MENU_INFORMATION* menu_information);
+VOID settings_menu_disable(MENU_INFORMATION *menu_information);
 
 #endif
