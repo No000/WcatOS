@@ -25,7 +25,7 @@ VOID boot_menu(uint32_t* stall_flag){
         /* result_key_dataとboot_menu_indexは、構造体でまとめても良かったのですが */
         /* グローバル変数が増えるのが嫌だったので、ポインタ渡しで実装 */
         /* ここにsetting_menu.cから戻ってきたときのみ走るinit処理を記載。分岐はenumで定義したflagによる分岐 */
-        result_key_data = menu_sentinel(result_key_data, 3, &boot_menu_index);
+        result_key_data = menu_sentinel(result_key_data, 4, &boot_menu_index);
         
 
         /* ここですべてのフラグをdisableする処理を記載============================================================== */
