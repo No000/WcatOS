@@ -9,7 +9,14 @@
 
 VOID settings_menu(){
     gST->ConOut->ClearScreen(gST->ConOut);
-    CHAR16 topline[] = {BOXDRAW_DOWN_RIGHT, BOXDRAW_HORIZONTAL, BOXDRAW_DOWN_HORIZONTAL, BOXDRAW_HORIZONTAL};
+    CHAR16 topline[] = {BOXDRAW_DOWN_RIGHT,
+                        BOXDRAW_HORIZONTAL,
+                        BOXDRAW_DOWN_HORIZONTAL,
+                        BOXDRAW_HORIZONTAL,
+                        ARROW_UP,
+                        GEOMETRICSHAPE_UP_TRIANGLE,
+                        BLOCKELEMENT_FULL_BLOCK,
+                        0x2591};
 
     UINTN height = 0;
     UINTN width = 0;
