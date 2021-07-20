@@ -38,6 +38,7 @@ void hlt() {
 #define KBC_STATUS_ADDR		0x0064
 #define KBC_STATUS_BIT_OBF	0x01
 
+/* 定義に関してはFreeBSDを参考 */
 const char keymap[] = {         /* keycodeの返り値を位置情報にしている */
 	ASCII_NOP,                  /* 0 */
     ASCII_ESC,                  /* 1 */
