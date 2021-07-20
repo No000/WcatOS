@@ -211,12 +211,44 @@ char getc(void)
 	return keymap[get_keycode()];
 }
 
+#include <stdarg.h>
+
+
+
+void printk(VIDEO_INFO video_info, color pixel_color,const char* format, ... ){
+      va_list ap;
+      va_start(ap, format);
+
+      char* string_buff;
+      int i = 0;
+      
+      for (string_buff = format; *string_buff != '\0'; string_buff++, i++) {
+          if (*string_buff == '%') {
+              string_buff++;
+              switch (*string_buff) {
+                  case 's':
+                      print_string(va_arg(ap, char *),video_info, pixel_color);
+                      break;
+                 case '%':
+                      print_char('%', video_info, pixel_color);
+                      break;
+              }
+              
+             } else {
+               print_char(string_buff[i], video_info, pixel_color);
+
+            }
+           }
+
+           va_end(ap);
+}
+
 void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   int i;
   uint8_t output_data[14] = "kernel_success";
 
   for (i = 0; i < 14; i++){
-	serialport_output(output_data[i]);
+    serialport_output(output_data[i]);
   }
 
 
@@ -248,8 +280,8 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   out8(0x60, 0xad);
 
 
-  
 
+  printk(wcat_boot_information->video_information, BLACK, "%% %s %s", "ascasdc", "testtest");
   while (1) {
 		char c = getc();
         if (c == '\n')
