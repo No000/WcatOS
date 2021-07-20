@@ -9,6 +9,8 @@
 
 VOID settings_menu(){
     gST->ConOut->ClearScreen(gST->ConOut);
+    CHAR16 topline[] = {BOXDRAW_DOWN_RIGHT, BOXDRAW_HORIZONTAL, BOXDRAW_DOWN_HORIZONTAL, BOXDRAW_HORIZONTAL};
+
     UINTN height = 0;
     UINTN width = 0;
     INTN i;
@@ -23,6 +25,7 @@ VOID settings_menu(){
             Print(L" ");
         }
     }
+    Print(topline);
     while (1);
     return;
 }
