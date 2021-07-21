@@ -26,6 +26,7 @@ typedef struct MEMORY_MAP {
 typedef struct WCAT_HEADER {
     VIDEO_INFO video_information;
     MEMORY_MAP memory_information;
+    uint64_t smbios_address;
 }WCAT_HEADER;
 
 #pragma pack()
