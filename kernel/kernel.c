@@ -244,6 +244,32 @@ void printk(VIDEO_INFO video_info, color pixel_color,const char* format, ... ){
            va_end(ap);
 }
 
+#pragma pack(1)
+typedef struct {
+    uint8_t    Type;
+    uint8_t          Length;
+    uint16_t  Handle;
+} SMBIOS_STRUCTURE;
+
+typedef struct {
+  uint8_t   AnchorString[4];
+  uint8_t   EntryPointStructureChecksum;
+  uint8_t   EntryPointLength;
+  uint8_t   MajorVersion;
+  uint8_t   MinorVersion;
+  uint16_t  MaxStructureSize;
+  uint8_t   EntryPointRevision;
+  uint8_t   FormattedArea[5];
+  uint8_t   IntermediateAnchorString[5];
+  uint8_t   IntermediateChecksum;
+  uint16_t  TableLength;
+  uint32_t  TableAddress;
+  uint16_t  NumberOfSmbiosStructures;
+  uint8_t   SmbiosBcdRevision;
+} SMBIOS_TABLE_ENTRY_POINT;
+
+#pragma pack()
+
 void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   int i;
   uint8_t output_data[14] = "kernel_success";
@@ -252,7 +278,11 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
     serialport_output(output_data[i]);
   }
 
+  SMBIOS_TABLE_ENTRY_POINT *smtable;
+  smtable = (SMBIOS_TABLE_ENTRY_POINT*)(wcat_boot_information->smbios_address);
 
+
+  
   pixel_bit_mask *frame_buffer =
       (pixel_bit_mask *)wcat_boot_information->video_information.frame_buffer_addr;
   for (uint32_t i = 0; i < wcat_boot_information->video_information.frame_buffer_size; ++i) {
@@ -283,6 +313,11 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
 
 
   printk(wcat_boot_information->video_information, BLACK, "%% %s %s", "ascasdc", "testtest");
+
+  print_char(smtable->AnchorString[0], wcat_boot_information->video_information, BLACK);
+  print_char(smtable->AnchorString[1], wcat_boot_information->video_information, BLACK);
+  print_char(smtable->AnchorString[2], wcat_boot_information->video_information, BLACK);
+  print_char(smtable->AnchorString[3], wcat_boot_information->video_information, BLACK);
   while (1) {
 		char c = getc();
         if (c == '\n')
