@@ -80,42 +80,6 @@ key_notise(IN EFI_KEY_DATA *KeyData){
     return EFI_SUCCESS;
 }
 
-
-/* キー入力があるまで待ち、キー入力があれば返す関数のテスト */
-/* EFI_INPUT_KEY efi_wait_any_key(){ */
-/*     EFI_INPUT_KEY retval = { 0, 0}; */
-/*     EFI_STATUS status; */
-/*     /\* EFI_EVENT timer_event; *\/ */
-/*     /\* EFI_EVENT events[1]; *\/ */
-/*     UINTN index = 0; */
-/*     /\* events[index++] = gST->ConIn->WaitForKey; *\/ */
-
-/*     /\* status = gBS->CreateEvent(EVT_TIMER, 0, NULL, NULL, &timer_event); *\/ */
-/*     /\* events[index++] = timer_event; *\/ */
-
-/*     status = gBS->WaitForEvent(1, &(gST->ConIn->WaitForKey), &index); */
-/*     while (1) { */
-/*         if (!EFI_ERROR(status)){ */
-/*             break; */
-/*         } else { */
-/*             __asm__("hlt"); */
-/*         } */
-/*     } */
-
-/*     if(!EFI_ERROR(status)) { */
-/*         if(index == 0) { */
-/*             EFI_INPUT_KEY key; */
-/*             status = gST->ConIn->ReadKeyStroke(gST->ConIn, &key); */
-/*             if (!EFI_ERROR(status)) { */
-/*                 retval = key; */
-/*             } */
-/*         } */
-/*     } else { */
-/*         Print(L"waitforevent error\n"); */
-/*     } */
-/*     return  retval; */
-/* } */
-
 EFI_STATUS
 EFIAPI
 UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
@@ -126,10 +90,11 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     EFI_FILE_INFO *file_info;
     struct FILE file_list[10];
     int index = 0;
+    struct WCAT_HEADER wcat_boot_information;
     
     /* watchdogタイマの無効化 */
     /* 5分刻みで再起動してしまうのを防ぐ。 */
-    SystemTable->BootServices->SetWatchdogTimer(0, 0, 0, NULL);
+    SystemTable->BootServices->SetWatchdogTimer(0, 0, 0, NULL); /* init処理 */
     
     
     /* ベンダー情報を記載 */
@@ -142,6 +107,8 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     smtable = find_efi_smbios_table();
     Print(L"%c", smtable->AnchorString[2]);
     SMBIOS_STRUCTURE_POINTER Smbios_struct;
+
+    wcat_boot_information.smbios_address = ((uint64_t)(find_efi_smbios_table())); /* 今後init処理に移行 */
     
     Smbios_struct.Hdr = (SMBIOS_STRUCTURE *)((UINTN)(smtable->TableAddress));
     
@@ -231,60 +198,9 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     boot_menu(&stall_flag);
     
     
-    
-    /* SystemTable->BootServices->WaitForEvent(1, &(SystemTable->ConIn->WaitForKey), */
-    /*                                       &waitIndex); //入力があるまで待機 */
-    
-    /* ここからRegisterKeyのテスト */
-    
-    /* EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *SimpleEx; */
-    /* EFI_KEY_DATA regi_key_data1; */
-    /* regi_key_data1.Key.UnicodeChar = '\r'; */
-    /* regi_key_data1.Key.ScanCode = 0; */
-    /* regi_key_data1.KeyState.KeyShiftState = 0; */
-    /* regi_key_data1.KeyState.KeyToggleState = 0; */
-    
-    /* EFI_GUID  gEfiSimpleTextInputExProtocolGuid = EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL_GUID; */
-    /* status = gBS->OpenProtocol( */
-    /*                            gST->ConsoleInHandle, */
-    /*                            &gEfiSimpleTextInputExProtocolGuid, */
-    /*                            (VOID**)&SimpleEx, */
-    /*                            gImageHandle, */
-    /*                            NULL, */
-    /*                            EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL); */
-    
-    /* Print(L"%r\n",status); */
-    /* if (EFI_ERROR(status)){ */
-    /*     Print(L"%r",status); */
-    /* } */
-    
-    
-    
-    /* VOID *notify_handle; */
-    /* status = SimpleEx->RegisterKeyNotify(SimpleEx, &regi_key_data1, key_notise, &notify_handle); */
-    /* Print(L"%r\n", status); */
-    /*   if (EFI_ERROR(status)){ */
-    /*     Print(L"Register key fail"); */
-    /* } */
-    /*   /\* Print("%d",is_exit); *\/ */
-    /* while (is_exit); */
-    /* ここまでをテスト */
-    
-    
     SystemTable->ConOut->ClearScreen(SystemTable->ConOut);
     StallBranch(stall_flag);
     /* rootディレクトリの情報を読み出している */
-    
-    /* 12_04 Loacteタイプ--------------------------------------------- */
-    /* status = ST->BootServices->LocateHandle(SFSP,
-     * &gEfiSimpleFileSystemProtocolGuid, NULL, ImageHandle,  ) */
-    /* status =
-     * ST->BootServices->LocateProtocol(&gEfiSimpleFileSystemProtocolGuid, NULL,
-     * (void **)&SFSP); */
-    /* Print(L"%r\n", status); */
-    /* status = SFSP->OpenVolume(SFSP, &root); */
-    /* Print(L"%r\n", status); */
-    /* -------------------------------------------------------- */
     
     status = OpenRootDir(ImageHandle, &root);
     StatusCheacker(status); /* statusチェック */
@@ -512,7 +428,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     UINTN num_gop_handles = 0;	/*  */
     EFI_HANDLE *gop_handles = NULL;
     /* struct VIDEO_INFO video_infomation; */
-    struct WCAT_HEADER wcat_boot_information;
+
     
     status = SystemTable->BootServices->LocateHandleBuffer(ByProtocol,
                                                            &gEfiGraphicsOutputProtocolGuid,
