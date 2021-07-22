@@ -99,7 +99,7 @@ VOID information(){
     Print(L"%x", smtable->NumberOfSmbiosStructures);
     Print(L"%x", SystemGuidTest);
 
-
+    Print(L"\n\n\n");           /* 臨時の改行 */
     Print(L"quit:press q");
     EFI_INPUT_KEY wait_key_data = {0, 0};
     wait_key_data = efi_wait_any_key();
