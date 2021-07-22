@@ -12,6 +12,7 @@
   menu/menu.c
   menu/menuLib.c
   menu/settings_menu/settings_menu.c
+  menu/information/information.c
   util.c
 
 [Packages]
