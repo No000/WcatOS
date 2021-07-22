@@ -145,54 +145,6 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     Print(L"%x", SystemGuidTest);
     
     
-    gST->ConOut->SetCursorPosition(gST->ConOut, 0, 13);
-    Print(L"UEFI information \n");
-    Print(L"UEFI Vendor information: %s\n", SystemTable->FirmwareVendor);
-    Print(L"UEFI Firmware version: 0x%x\n", SystemTable->FirmwareRevision);
-    Print(L"Support UEFI Specification: UEFI");
-    switch (SystemTable->Hdr.Revision) {
-    case EFI_1_02_SYSTEM_TABLE_REVISION:
-        Print(L" 1.02 ");
-        break;
-    case EFI_1_10_SYSTEM_TABLE_REVISION:
-        Print(L" 1.10 ");
-        break;
-    case EFI_2_00_SYSTEM_TABLE_REVISION:
-        Print(L" 2.00 ");
-        break;
-    case EFI_2_10_SYSTEM_TABLE_REVISION:
-        Print(L" 2.10 ");
-        break;
-    case EFI_2_20_SYSTEM_TABLE_REVISION:
-        Print(L" 2.20 ");
-        break;
-    case EFI_2_30_SYSTEM_TABLE_REVISION:
-        Print(L" 2.30 ");
-        break;
-    case EFI_2_31_SYSTEM_TABLE_REVISION:
-        Print(L" 2.31 ");
-        break;
-    case EFI_2_40_SYSTEM_TABLE_REVISION:
-        Print(L" 2.40 ");
-        break;
-    case EFI_2_50_SYSTEM_TABLE_REVISION:
-        Print(L" 2.50 ");
-        break;
-    case EFI_2_60_SYSTEM_TABLE_REVISION:
-        Print(L" 2.60 ");
-        break;
-    case EFI_2_70_SYSTEM_TABLE_REVISION:
-        Print(L" 2.70 ");
-        break;
-    case EFI_2_80_SYSTEM_TABLE_REVISION:
-        Print(L" 2.80 ");
-        break;
-    default:
-        Print(L"%x", SystemTable->Hdr.Revision);
-    }
-    Print(L"supported\n");
-    
-    
     /* Stall用のフラグ */
     uint32_t stall_flag = 0;
     boot_menu(&stall_flag);
