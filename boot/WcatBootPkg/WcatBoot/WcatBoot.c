@@ -468,7 +468,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     /* 	frame_buffer[i] = 255; */
     /* } */
     
-    /* カーネルに渡すグラフィックのデータ */
+    /* カーネルに渡すグラフィックのデータ(init処理) */
     wcat_boot_information.video_information.frame_buffer_addr = (uint8_t *)gop->Mode->FrameBufferBase;
     wcat_boot_information.video_information.frame_buffer_size = (uint64_t)gop->Mode->FrameBufferSize;
     wcat_boot_information.video_information.horizen_size = (uint32_t)gop->Mode->Info->HorizontalResolution;
