@@ -15,6 +15,7 @@
 #include "graphic.h"
 #include "font.h"
 #include "io.h"
+#include "../boot/WcatBootPkg/WcatBoot/wcat_boot_header.h" /* シンボリックリンクに変更をする */
 
 #define FONT_HEIGHT 10
 #define FONT_WIDTH 8
