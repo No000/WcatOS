@@ -11,5 +11,6 @@ VOID Hlt();
 VOID StatusCheacker(EFI_STATUS status);
 EFI_STATUS OpenRootDir(EFI_HANDLE image_handle, EFI_FILE_PROTOCOL **root);
 VOID StallBranch(uint32_t boot_menu_index);
+EFI_INPUT_KEY efi_wait_any_key();
 
 #endif

@@ -87,7 +87,30 @@ PUBLIC VOID Hlt() {
 }
 
 
+PUBLIC EFI_INPUT_KEY efi_wait_any_key(){
+    EFI_INPUT_KEY ret_keydata = { 0, 0};
+    EFI_STATUS status;
+    UINTN index = 0;
 
+    status = gBS->WaitForEvent(1, &(gST->ConIn->WaitForKey), &index);
+    while (1) {
+        if (!EFI_ERROR(status)){
+            break;
+        }
+    }
+    if(!EFI_ERROR(status)) {
+        if(index == 0) {
+            EFI_INPUT_KEY key;
+            status = gST->ConIn->ReadKeyStroke(gST->ConIn, &key);
+            if (!EFI_ERROR(status)) {
+                ret_keydata = key;
+            }
+        }
+    } else {
+        Print(L"waitforevent error\n");
+    }
+    return  ret_keydata;
+}
 
 VOID StallBranch(uint32_t boot_menu_index){
     if (boot_menu_index == 1){
