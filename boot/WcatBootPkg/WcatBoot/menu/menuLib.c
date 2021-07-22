@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "menuLib.h"
+#include "../util.h"
 
 #define CURSOR_INIT_X 6
 
@@ -34,6 +35,14 @@ PUBLIC VOID boot_process_disable(MENU_INFORMATION* menu_information){
 
 PUBLIC VOID boot_process_enable(MENU_INFORMATION* menu_information){
     menu_information->boot_process_start_flag = 1;
+}
+
+PUBLIC VOID information_enable(MENU_INFORMATION* menu_information){
+    menu_information->information_flag = 1;
+}
+
+PUBLIC VOID information_disable(MENU_INFORMATION* menu_information){
+    menu_information->information_flag = 0;
 }
 
 PUBLIC VOID boot_menu_flag_init(MENU_INFORMATION* menu_information){
@@ -104,30 +113,7 @@ PUBLIC VOID cursor_print(uint32_t cursor_position){/* 型大きすぎるかも�
     Print(L">    ");
 }
 
-PUBLIC EFI_INPUT_KEY efi_wait_any_key(){
-    EFI_INPUT_KEY ret_keydata = { 0, 0};
-    EFI_STATUS status;
-    UINTN index = 0;
 
-    status = gBS->WaitForEvent(1, &(gST->ConIn->WaitForKey), &index);
-    while (1) {
-        if (!EFI_ERROR(status)){
-            break;
-        }
-    }
-    if(!EFI_ERROR(status)) {
-        if(index == 0) {
-            EFI_INPUT_KEY key;
-            status = gST->ConIn->ReadKeyStroke(gST->ConIn, &key);
-            if (!EFI_ERROR(status)) {
-                ret_keydata = key;
-            }
-        }
-    } else {
-        Print(L"waitforevent error\n");
-    }
-    return  ret_keydata;
-}
 
 PUBLIC VOID stall(uint32_t microseconds){
     gST->BootServices->Stall(microseconds);
