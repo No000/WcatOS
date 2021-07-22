@@ -17,7 +17,6 @@
 
 VOID boot_menu(uint32_t* stall_flag){
     clear();
- /* ret_information: */
     stall_logo_print();
     /* init処理をまとめる */
     menu_init(18);
@@ -91,7 +90,6 @@ VOID boot_menu(uint32_t* stall_flag){
             settings_menu();
         } else if (result_key_data.UnicodeChar == '\r' && menu_information.information_flag == 1){
             information();
-            /* goto ret_information; */
             ret_menuprint_flag = TRUE;
         }
     }
