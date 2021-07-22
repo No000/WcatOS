@@ -23,6 +23,8 @@ typedef struct MEMORY_MAP {
     uint32_t descriptor_version;
 }MEMORY_MAP;
 
+
+/* 渡す構造体の本体 */
 typedef struct WCAT_HEADER {
     VIDEO_INFO video_information;
     MEMORY_MAP memory_information;
