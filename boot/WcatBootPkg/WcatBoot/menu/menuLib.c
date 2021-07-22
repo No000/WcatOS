@@ -71,15 +71,6 @@ PUBLIC EFI_INPUT_KEY menu_sentinel(EFI_INPUT_KEY key_data, uint32_t menu_number,
 
 PUBLIC VOID clear(){
     gST->ConOut->ClearScreen(gST->ConOut);
-    /* gst->ConOut->SetAttribute(gST->ConOut, 0x10); */
-
-    /* UINTN height = 0; */
-    /* UINTN width = 0; */
-    /* gST->ConOut->QueryMode(gST->ConOut, gST->ConOut->Mode->Mode, &width, &height); */
-    /* Print(L"%d\n", height); */
-    /* Print(L"%d\n", width); */
-    
-
 }
 
 PUBLIC VOID set_cursor(uint32_t cursor_x, uint32_t cursor_y){
@@ -120,6 +111,34 @@ PUBLIC VOID stall(uint32_t microseconds){
 }
 
 PUBLIC VOID logo_print(){
+     /* ロゴの表示（エスケープシーケンスに注意） */
+    gST->ConOut->SetCursorPosition(gST->ConOut, 0, 0);
+    Print(L" __       __                        __       ______    ______  \n");
+    gST->ConOut->SetCursorPosition(gST->ConOut, 0, 1);
+    Print(L"/  |  _  /  |                      /  |     /      \\  /      \\ \n");
+    gST->ConOut->SetCursorPosition(gST->ConOut, 0, 2);
+    Print(L"$$ | / \\ $$ |  _______   ______   _$$ |_   /$$$$$$  |/$$$$$$  |\n");
+    gST->ConOut->SetCursorPosition(gST->ConOut, 0, 3);
+    Print(L"$$ |/$  \\$$ | /       | /      \\ / $$   |  $$ |  $$ |$$ \\__$$/ \n");
+    gST->ConOut->SetCursorPosition(gST->ConOut, 0, 4);
+    Print(L"$$ /$$$  $$ |/$$$$$$$/  $$$$$$  |$$$$$$/   $$ |  $$ |$$      \\ \n");
+    gST->ConOut->SetCursorPosition(gST->ConOut, 0, 5);
+    Print(L"$$ $$/$$ $$ |$$ |       /    $$ |  $$ | __ $$ |  $$ | $$$$$$  |\n");
+    gST->ConOut->SetCursorPosition(gST->ConOut, 0, 6);
+    Print(L"$$$$/  $$$$ |$$ \\_____ /$$$$$$$ |  $$ |/  |$$ \\__$$ |/  \\__$$ |\n");
+    gST->ConOut->SetCursorPosition(gST->ConOut, 0, 7);
+    Print(L"$$$/    $$$ |$$       |$$    $$ |  $$  $$/ $$    $$/ $$    $$/ \n");
+    gST->ConOut->SetCursorPosition(gST->ConOut, 0, 8);
+    Print(L"$$/      $$/  $$$$$$$/  $$$$$$$/    $$$$/   $$$$$$/   $$$$$$/  \n");
+    gST->ConOut->SetCursorPosition(gST->ConOut, 0, 9);
+    Print(L"                                                               \n");
+    gST->ConOut->SetCursorPosition(gST->ConOut, 0, 10);
+    Print(L"                                                               \n");
+    gST->ConOut->SetCursorPosition(gST->ConOut, 0, 11);
+    Print(L"                                                               \n");
+}
+
+PUBLIC VOID stall_logo_print(){
      /* ロゴの表示（エスケープシーケンスに注意） */
     gST->ConOut->SetCursorPosition(gST->ConOut, 0, 0); /* QueryMode()でカーソルの位置を指定するAPI */
     Print(L" __       __                        __       ______    ______  \n");

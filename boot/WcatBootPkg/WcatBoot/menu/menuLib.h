@@ -21,6 +21,7 @@ typedef struct MENU_INFORMATION{
 EFI_INPUT_KEY efi_wait_any_key();
 VOID stall(uint32_t microseconds);
 VOID logo_print();
+VOID stall_logo_print();
 VOID menu_init(uint32_t cursor_y);
 VOID cursor_init(uint32_t cursor_y);
 VOID cursor_print(uint32_t cursor_position); /* cursor_positionは次に描画するカーソルの位置を指定 */
