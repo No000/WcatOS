@@ -58,7 +58,7 @@ PUBLIC CHAR8* get_smbios_string(IN SMBIOS_STRUCTURE_POINTER *Smbios,
 
 
 /* GUIDからSMBIOSのエントリテーブルを探す */
-PUBLIC void *find_efi_smbios_table(void) {
+PUBLIC VOID *find_efi_smbios_table(VOID) {
     EFI_GUID efi_smbios_table = SMBIOS_TABLE_GUID;
   /* const EFI_GUID efi_smbios = SMBIOS_TABLE_GUID; */
   unsigned long long i;
