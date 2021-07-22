@@ -17,16 +17,24 @@
 
 VOID boot_menu(uint32_t* stall_flag){
     clear();
- ret_information:
-    logo_print();
+ /* ret_information: */
+    stall_logo_print();
     /* init処理をまとめる */
     menu_init(18);
+    BOOLEAN ret_menuprint_flag = FALSE;
     cursor_init(18);
     EFI_INPUT_KEY result_key_data = {0, 0};
     MENU_INFORMATION menu_information;
     boot_menu_flag_init(&menu_information);
     uint32_t boot_menu_index = 0;
     for(;;) {
+        if (ret_menuprint_flag){
+            clear();
+            logo_print();
+            menu_init(18);
+            ret_menuprint_flag = FALSE;
+            cursor_init(18 + boot_menu_index); /* 18はメニューのcursor_yの初期値（相対値） */
+        }
         /* result_key_dataとboot_menu_indexは、構造体でまとめても良かったのですが */
         /* グローバル変数が増えるのが嫌だったので、ポインタ渡しで実装 */
         /* ここにsetting_menu.cから戻ってきたときのみ走るinit処理を記載。分岐はenumで定義したflagによる分岐 */
@@ -83,7 +91,8 @@ VOID boot_menu(uint32_t* stall_flag){
             settings_menu();
         } else if (result_key_data.UnicodeChar == '\r' && menu_information.information_flag == 1){
             information();
-            goto ret_information;
+            /* goto ret_information; */
+            ret_menuprint_flag = TRUE;
         }
     }
 }
