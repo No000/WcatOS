@@ -1,7 +1,7 @@
 * Todoリスト
-  - [ ] menuLibをmenu_util.cに変更
-  - [ ] WcatBootのメインプロセスをひと目でわかるようにする
-  - [ ] MikanBootを参考にメモリダンプ機能の追加
-  - [ ] WcatOSに渡すヘッダーファイルをmultibootやMikanosを参考に完成させる
-  - [ ] ACPIのサポート
+  1. [ ] menuLibをmenu_util.cに変更
+  2. [ ] WcatBootのメインプロセスをひと目でわかるようにする
+  3. [ ] MikanBootを参考にメモリダンプ機能の追加
+  4. [ ] WcatOSに渡すヘッダーファイルをmultibootやMikanosを参考に完成させる
+  5. [ ] ACPIのサポート
   
