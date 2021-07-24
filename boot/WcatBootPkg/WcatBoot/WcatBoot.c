@@ -36,6 +36,7 @@
 
 #include "util.h"
 #include "util.h"
+#include "wcat_boot_util.h"
 /* ELFヘッダーは */
 
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *SFSP;
@@ -44,14 +45,9 @@ EFI_SYSTEM_TABLE *ST;
 
 /* 追加 */
 /* ここはfile_infoを利用して動的に取得できるようにする */
-#define MAX_FILE_NAME_LEN 15	/* ルートディレクトリを表示する際のファイル名の */
 #define MAX_FILE_NUM 10
-#define MAX_FILE_BUF 1024 /* test用のファイルバッファの大きさ */
 
-/* ファイル名格納用構造体 */
-struct FILE {
-    uint16_t name[MAX_FILE_NAME_LEN];
-} __attribute__((packed));
+
 
 /* このMemoryMapはヘッダーファイル化してkernelにもincludeさせる必要があるかもしれない
  */
@@ -65,94 +61,31 @@ struct MemoryMap {
     uint32_t descriptor_version;
 };
 
-
-
-
-BOOLEAN is_exit = FALSE;
-/* EFI_HANDLE notifyHandle; */
-/* Regikeyのテスト用 */
-EFI_STATUS
-EFIAPI
-key_notise(IN EFI_KEY_DATA *KeyData){
-    gST->ConOut->ClearScreen(gST->ConOut);
-    Print(L"asdcacd\n");
-    is_exit = TRUE;
-    return EFI_SUCCESS;
-}
-
 EFI_STATUS
 EFIAPI
 UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     EFI_STATUS status; /* 各種EFI_STATUSの返り値を格納する変数 */
     EFI_FILE_PROTOCOL *root; /* rootを呼び出す */
-    UINTN buf_size;
-    uint8_t file_buf[MAX_FILE_BUF];
-    EFI_FILE_INFO *file_info;
-    struct FILE file_list[10];
-    int index = 0;
     struct WCAT_HEADER wcat_boot_information;
     
-    /* watchdogタイマの無効化 */
-    /* 5分刻みで再起動してしまうのを防ぐ。 */
-    SystemTable->BootServices->SetWatchdogTimer(0, 0, 0, NULL); /* init処理 */
-    
-    
-    /* ベンダー情報を記載 */
-    /* FirmWare vendor情報 */
-    /* Firmware バージョン情報 */
-    /* support UEFI */
-    /* メモリ情報を読み出し、バッファを構造体に割りあてる */
-    gST->ConOut->SetCursorPosition(gST->ConOut, 0, 12);
-    SMBIOS_TABLE_ENTRY_POINT *smtable;
-    smtable = find_efi_smbios_table();
-    Print(L"%c", smtable->AnchorString[2]);
-    SMBIOS_STRUCTURE_POINTER Smbios_struct;
+
+    status = watchdogtimer_disable();
+    StatusCheacker(status);
+
 
     wcat_boot_information.smbios_address = ((uint64_t)(find_efi_smbios_table())); /* 今後init処理に移行 */
     
-    Smbios_struct.Hdr = (SMBIOS_STRUCTURE *)((UINTN)(smtable->TableAddress));
-    
-    Print(L"%x", smtable->TableLength);
-    
-    IN EFI_GUID *SystemGuidTest = NULL;
-    Print(L"=");
-    Print(L"%d.%d", smtable->MajorVersion, smtable->MinorVersion);
-    Print(L"=");
-    Print(L"%d", Smbios_struct.Type1->WakeUpType);  
-    Print(L"=");
-    /* 以下の関数を呼ぶたびにテーブルが一つ進む */
-    int smbios_count;
-    for (smbios_count = 0; smbios_count < smtable->NumberOfSmbiosStructures; smbios_count++){
-        if (Smbios_struct.Hdr->Type == 1) {
-            AsciiPrint(get_smbios_string(&Smbios_struct, Smbios_struct.Type1->Family));
-            break;
-        } else {
-            smbios_next_table_move(&Smbios_struct);
-        }
-    }
-    
-    Print(L"=");
-    
-    Print(L"=");
 
     
-    Print(L"%c", smtable->IntermediateAnchorString[0]);
-    Print(L"%c", smtable->IntermediateAnchorString[1]);
-    Print(L"%x", smtable->MajorVersion);
-    Print(L"%x", smtable->MinorVersion);
-    Print(L"  ");
-    Print(L"%x", smtable->NumberOfSmbiosStructures);
-    Print(L"%x", SystemGuidTest);
-    
+
     
     /* Stall用のフラグ */
     uint32_t stall_flag = 0;
     boot_menu(&stall_flag);
     
-    
-    SystemTable->ConOut->ClearScreen(SystemTable->ConOut);
+    clear_screen();
+
     StallBranch(stall_flag);
-    /* rootディレクトリの情報を読み出している */
     
     status = OpenRootDir(ImageHandle, &root);
     StatusCheacker(status); /* statusチェック */
@@ -162,29 +95,11 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
         Hlt();
     }
     
-    /* SystemTable->BootServices->Stall(1000000); */
     StallBranch(stall_flag);
     
-    /* Rootでぃれくとりの表示 */
-    Print(L"RootDirectory: ");
+    print_rootdir(root);
     
-    /* ファイル名を繰り返すことで読み出している */
-    while (1) {
-        buf_size = MAX_FILE_BUF;
-        status = root->Read(root, &buf_size, (void *)file_buf);
-        if (!buf_size) {
-            break;
-        }
-        
-        file_info = (EFI_FILE_INFO *)file_buf;
-        StrnCopy(file_list[index].name, file_info->FileName, MAX_FILE_NAME_LEN - 1);
-        file_list[index].name[MAX_FILE_NAME_LEN - 1] = L'\0';
-        Print(file_list[index].name);
-        Print(L" ");
-        index++;
-    }
-    
-    Print(L"\n");
+
     
     StallBranch(stall_flag);
     
