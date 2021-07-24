@@ -8,6 +8,7 @@
 
 [Sources]
   WcatBoot.c
+  wcat_boot_util.c
   smbios.c
   menu/menu.c
   menu/menu_util.c
