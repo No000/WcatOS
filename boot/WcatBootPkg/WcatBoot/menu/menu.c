@@ -4,7 +4,7 @@
 #include <Library/UefiRuntimeServicesTableLib.h> /* gRT */
 #include <stdint.h>
 #include "menu.h"
-#include "menuLib.h"
+#include "menu_util.h"
 
 #include "settings_menu/settings_menu.h"
 #include "information/information.h"
