@@ -25,13 +25,23 @@ PUBLIC VOID StatusCheacker(EFI_STATUS status) {
     Print(L"]");
 }
 
+PUBLIC VOID clear_screen(){
+    gST->ConOut->ClearScreen(gST->ConOut);
+    return;
+}
+
+PUBLIC VOID error_hlt(EFI_STATUS status){
+    if (EFI_ERROR(status)) {
+        Hlt();
+    }
+    return;
+}
+
 
 
 
 /* MikanOSのブートローダーより引用 */
-PUBLIC
-EFI_STATUS
-OpenRootDir(EFI_HANDLE image_handle, EFI_FILE_PROTOCOL **root) {
+PUBLIC EFI_STATUS OpenRootDir(EFI_HANDLE image_handle, EFI_FILE_PROTOCOL **root) {
     EFI_STATUS status;
     EFI_LOADED_IMAGE_PROTOCOL *loaded_image;
     EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *fs;

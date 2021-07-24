@@ -4,7 +4,7 @@
 #include <Library/UefiRuntimeServicesTableLib.h> /* gRT */
 #include <stdint.h>
 
-#include "menuLib.h"
+#include "menu_util.h"
 #include "../util.h"
 
 #define CURSOR_INIT_X 6

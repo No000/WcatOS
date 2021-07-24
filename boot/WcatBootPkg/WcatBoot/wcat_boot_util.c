@@ -39,7 +39,7 @@ PUBLIC VOID print_rootdir(EFI_FILE_PROTOCOL *root){
     
     
     int index = 0;
-    /* Rootでぃれくとりの表示 */
+
     Print(L"RootDirectory: ");
     
     /* ファイル名を繰り返すことで読み出している */

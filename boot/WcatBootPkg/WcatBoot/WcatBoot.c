@@ -35,7 +35,6 @@
 #include <stdint.h>
 
 #include "util.h"
-#include "util.h"
 #include "wcat_boot_util.h"
 /* ELFヘッダーは */
 
@@ -68,19 +67,13 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     EFI_FILE_PROTOCOL *root; /* rootを呼び出す */
     struct WCAT_HEADER wcat_boot_information;
     
-
     status = watchdogtimer_disable();
     StatusCheacker(status);
-
 
     wcat_boot_information.smbios_address = ((uint64_t)(find_efi_smbios_table())); /* 今後init処理に移行 */
     
 
-    
-
-    
-    /* Stall用のフラグ */
-    uint32_t stall_flag = 0;
+    uint32_t stall_flag = 0;    /* Stall用のフラグ */
     boot_menu(&stall_flag);
     
     clear_screen();
@@ -89,30 +82,17 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     
     status = OpenRootDir(ImageHandle, &root);
     StatusCheacker(status); /* statusチェック */
-
     Print(L"    OpenRootDir\n");
-    if (EFI_ERROR(status)) {
-        Hlt();
-    }
-    
-    StallBranch(stall_flag);
-    
-    print_rootdir(root);
-    
+    error_hlt(status);
 
     
     StallBranch(stall_flag);
-    
-    
+    print_rootdir(root);
+    StallBranch(stall_flag);
     StatusCheacker(status); /* statusチェック */
     Print(L"    Read status\n");
-    if (EFI_ERROR(status)) {
-        Hlt();
-    }
-    
+    error_hlt(status);
     StallBranch(stall_flag);
-    
-    
     /* 疑似シェルのlsコマンドとする場合等はCloseが必要となるが現状はファイル名を読み出したいだけであるためなし */
     
     /* Elfファイルの情報の抜き出しを行う */
@@ -133,9 +113,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     
     StatusCheacker(status); /* statusチェック */
     Print(L"    kernelfile open\n");
-    if (EFI_ERROR(status)) {
-        Hlt();
-    }
+    error_hlt(status);
     
     StallBranch(stall_flag);
     
@@ -146,9 +124,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
                                   &kernel_file_info_size, kernel_file_info_buf);
     StatusCheacker(status); /* statusチェック */
     Print(L"    Getinfo\n");
-    if (EFI_ERROR(status)) {
-        Hlt();
-    }
+    error_hlt(status);
     
     EFI_FILE_INFO *kerne_file_info = (EFI_FILE_INFO *)kernel_file_info_buf;
     UINTN kernel_file_size = kerne_file_info->FileSize;
@@ -158,9 +134,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     status = gBS->AllocatePool(EfiLoaderData, kernel_file_size, (void **)&kernel_buffer);
     StatusCheacker(status); /* statusチェック */
     Print(L"    AllocatePool\n");
-    if (EFI_ERROR(status)) {
-        Hlt();
-    }
+    error_hlt(status);
     
     StallBranch(stall_flag);
     
@@ -294,7 +268,6 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     EFI_GRAPHICS_OUTPUT_PROTOCOL *gop;
     UINTN num_gop_handles = 0;	/*  */
     EFI_HANDLE *gop_handles = NULL;
-    /* struct VIDEO_INFO video_infomation; */
 
     
     status = SystemTable->BootServices->LocateHandleBuffer(ByProtocol,
@@ -330,10 +303,6 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     Print(L"FrameBufferSize%d\n", gop->Mode->FrameBufferSize);
     
     
-    /* UINT8 *frame_buffer  =(UINT8*)gop->Mode->FrameBufferBase; */
-    /* for (UINTN i = 0; i < gop->Mode->FrameBufferSize; ++i) { */
-    /* 	frame_buffer[i] = 255; */
-    /* } */
     
     /* カーネルに渡すグラフィックのデータ(init処理) */
     wcat_boot_information.video_information.frame_buffer_addr = (uint8_t *)gop->Mode->FrameBufferBase;
@@ -424,15 +393,15 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     }
 
     /* UINT8 *frame_buffer  =(UINT8*)gop->Mode->FrameBufferBase; */
-    unsigned int hr = gop->Mode->Info->HorizontalResolution;
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL *p = (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *)gop->Mode->FrameBufferBase;
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL *q = p + (hr * 30) + 30;
-    for (UINTN i = 0; i < gop->Mode->FrameBufferSize; ++i) {
-        /* frame_buffer[i] = 0x24; */
-        q[i].Red = 0xAD;
-        q[i].Green = 0xFF;
-        q[i].Blue = 0x2F;
-    }
+    /* unsigned int hr = gop->Mode->Info->HorizontalResolution; */
+    /* EFI_GRAPHICS_OUTPUT_BLT_PIXEL *p = (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *)gop->Mode->FrameBufferBase; */
+    /* EFI_GRAPHICS_OUTPUT_BLT_PIXEL *q = p + (hr * 30) + 30; */
+    /* for (UINTN i = 0; i < gop->Mode->FrameBufferSize; ++i) { */
+    /*     /\* frame_buffer[i] = 0x24; *\/ */
+    /*     q[i].Red = 0xAD; */
+    /*     q[i].Green = 0xFF; */
+    /*     q[i].Blue = 0x2F; */
+    /* } */
     /* カーネル側での手土産の設定とカーネルさんへのお願い */
 
     /* ELFの24に関しては以下を参照 */
