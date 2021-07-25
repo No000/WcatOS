@@ -29,7 +29,7 @@ struct FILE {
     uint16_t name[MAX_FILE_NAME_LEN];
 } __attribute__((packed));
 
-PUBLIC VOID print_rootdir(EFI_FILE_PROTOCOL *root){
+PUBLIC EFI_STATUS print_rootdir(EFI_FILE_PROTOCOL *root){
     UINTN buf_size;
     EFI_STATUS status;
     uint8_t file_buf[MAX_FILE_BUF];
@@ -45,7 +45,7 @@ PUBLIC VOID print_rootdir(EFI_FILE_PROTOCOL *root){
     /* ファイル名を繰り返すことで読み出している */
     while (1) {
         buf_size = MAX_FILE_BUF;
-        status = root->Read(root, &buf_size, (void *)file_buf);
+        status = root->Read(root, &buf_size, (void *)file_buf);    /* 疑似シェルのlsコマンドとする場合等はCloseが必要となるが現状はファイル名を読み出したいだけであるためなし */
         if (!buf_size) {
             break;
         }
@@ -58,5 +58,5 @@ PUBLIC VOID print_rootdir(EFI_FILE_PROTOCOL *root){
         index++;
     }
     Print(L"\n");
-    return;
+    return status;
 }

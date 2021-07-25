@@ -65,35 +65,67 @@ EFIAPI
 UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     EFI_STATUS status; /* 各種EFI_STATUSの返り値を格納する変数 */
     EFI_FILE_PROTOCOL *root; /* rootを呼び出す */
+    uint32_t stall_flag = 0;    /* Stall用のフラグ */
     struct WCAT_HEADER wcat_boot_information;
     
     status = watchdogtimer_disable();
     StatusCheacker(status);
-
-    wcat_boot_information.smbios_address = ((uint64_t)(find_efi_smbios_table())); /* 今後init処理に移行 */
     
+    /* smbiosのinitプロセス */
+    wcat_boot_information.smbios_address = ((uint64_t)(find_efi_smbios_table()));
 
-    uint32_t stall_flag = 0;    /* Stall用のフラグ */
+
+    /* GOP初期化設定 */
+    EFI_GRAPHICS_OUTPUT_PROTOCOL *gop;
+    UINTN num_gop_handles = 0;	/*  */
+    EFI_HANDLE *gop_handles = NULL;
+
+    
+    status = gST->BootServices->LocateHandleBuffer(ByProtocol,
+                                                   &gEfiGraphicsOutputProtocolGuid,
+                                                   NULL,
+                                                   &num_gop_handles,
+                                                   &gop_handles);
+    StatusCheacker(status);
+    
+    
+    
+    status = gST->BootServices->OpenProtocol(gop_handles[0],
+                                             &gEfiGraphicsOutputProtocolGuid,
+                                             (VOID **)&gop,
+                                             ImageHandle,
+                                             NULL,
+                                             EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
+    StatusCheacker(status);
+    FreePool(gop_handles);		/* この処理が何なのかが気になる */
+
+    /* カーネルに渡すグラフィックのデータ(init処理) */
+    wcat_boot_information.video_information.frame_buffer_addr = (uint8_t *)gop->Mode->FrameBufferBase;
+    wcat_boot_information.video_information.frame_buffer_size = (uint64_t)gop->Mode->FrameBufferSize;
+    wcat_boot_information.video_information.horizen_size = (uint32_t)gop->Mode->Info->HorizontalResolution;
+    wcat_boot_information.video_information.vertical_size = (uint32_t)gop->Mode->Info->VerticalResolution;
+    wcat_boot_information.video_information.pixel_per_scanline = (uint32_t)gop->Mode->Info->PixelsPerScanLine;
+
+    /* メニュー表示の処理 */
     boot_menu(&stall_flag);
-    
-    clear_screen();
 
+    /* ルートディレクトリ展開処理 */
+    clear_screen();
     StallBranch(stall_flag);
-    
     status = OpenRootDir(ImageHandle, &root);
     StatusCheacker(status); /* statusチェック */
     Print(L"    OpenRootDir\n");
     error_hlt(status);
-
-    
     StallBranch(stall_flag);
-    print_rootdir(root);
+
+
+    /* ルートディレクトリのファイル・ディレクトリをダンプ */
+    status = print_rootdir(root);
     StallBranch(stall_flag);
     StatusCheacker(status); /* statusチェック */
     Print(L"    Read status\n");
     error_hlt(status);
     StallBranch(stall_flag);
-    /* 疑似シェルのlsコマンドとする場合等はCloseが必要となるが現状はファイル名を読み出したいだけであるためなし */
     
     /* Elfファイルの情報の抜き出しを行う */
     /* 流れは */
@@ -179,10 +211,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     Print(L"programheader number:");
     Print(L"%08x\n", kernel_ehdr->e_phnum);
     
-    /*
-      kernel_first_address:カーネルの最初のアドレス
-      kernel_last_address:カーネルの最後のアドレス
-    */
+
     UINT64 kernel_first_address, kernel_last_address;
     /* プログラムヘッダーの位置の計算を行う */
     Elf64_Phdr *phdr = (Elf64_Phdr *)((UINT64)kernel_ehdr + kernel_ehdr->e_phoff);
@@ -262,54 +291,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     
     
     
-    /* ====================================================================================== */
-    /* GOPの設定 */
-    /* プロトコルを開いていく */
-    EFI_GRAPHICS_OUTPUT_PROTOCOL *gop;
-    UINTN num_gop_handles = 0;	/*  */
-    EFI_HANDLE *gop_handles = NULL;
 
-    
-    status = SystemTable->BootServices->LocateHandleBuffer(ByProtocol,
-                                                           &gEfiGraphicsOutputProtocolGuid,
-                                                           NULL,
-                                                           &num_gop_handles,
-                                                           &gop_handles);
-    StatusCheacker(status);
-    Print(L"GOP LocateHandleBuffer\n");
-    StallBranch(stall_flag);
-    
-    
-    
-    status = SystemTable->BootServices->OpenProtocol(gop_handles[0],
-                                                     &gEfiGraphicsOutputProtocolGuid,
-                                                     (VOID **)&gop,
-                                                     ImageHandle,
-                                                     NULL,
-                                                     EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL);
-    StatusCheacker(status);
-    Print(L"GOP OpenProtocol\n");
-    FreePool(gop_handles);		/* この処理が何なのかが気になる */
-    
-    
-    /* ピクセルフォーマットの確認する関数 */
-    Print(L"%d\n", gop->Mode->Info->PixelFormat);
-    
-    
-    /* RGBで指定できるように設定をする */
-    
-    
-    
-    Print(L"FrameBufferSize%d\n", gop->Mode->FrameBufferSize);
-    
-    
-    
-    /* カーネルに渡すグラフィックのデータ(init処理) */
-    wcat_boot_information.video_information.frame_buffer_addr = (uint8_t *)gop->Mode->FrameBufferBase;
-    wcat_boot_information.video_information.frame_buffer_size = (uint64_t)gop->Mode->FrameBufferSize;
-    wcat_boot_information.video_information.horizen_size = (uint32_t)gop->Mode->Info->HorizontalResolution;
-    wcat_boot_information.video_information.vertical_size = (uint32_t)gop->Mode->Info->VerticalResolution;
-    wcat_boot_information.video_information.pixel_per_scanline = (uint32_t)gop->Mode->Info->PixelsPerScanLine;
     
     /* ====================================================================================== */
     /* ExitBootServicesするためのmemorymapを取得する */
@@ -391,17 +373,6 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
             frame_buffer[i] = 255;
         }
     }
-
-    /* UINT8 *frame_buffer  =(UINT8*)gop->Mode->FrameBufferBase; */
-    /* unsigned int hr = gop->Mode->Info->HorizontalResolution; */
-    /* EFI_GRAPHICS_OUTPUT_BLT_PIXEL *p = (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *)gop->Mode->FrameBufferBase; */
-    /* EFI_GRAPHICS_OUTPUT_BLT_PIXEL *q = p + (hr * 30) + 30; */
-    /* for (UINTN i = 0; i < gop->Mode->FrameBufferSize; ++i) { */
-    /*     /\* frame_buffer[i] = 0x24; *\/ */
-    /*     q[i].Red = 0xAD; */
-    /*     q[i].Green = 0xFF; */
-    /*     q[i].Blue = 0x2F; */
-    /* } */
     /* カーネル側での手土産の設定とカーネルさんへのお願い */
 
     /* ELFの24に関しては以下を参照 */

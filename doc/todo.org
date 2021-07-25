@@ -1,8 +1,7 @@
 * Todoリスト
   1. [X] menuLibをmenu_util.cに変更
-  2. [ ] WcatBootのメインプロセスをひと目でわかるようにする(すべてutilに一旦分割、その後さらに分割予定)
-  3. [ ] wcat_boot_processという関数を作成し、exit_boot_serviceまで行く関数を作る
-  4. [ ] MikanBootを参考にメモリダンプ機能の追加
-  5. [ ] WcatOSに渡すヘッダーファイルをmultibootやMikanosを参考に完成させる
-  6. [ ] ACPIのサポート
+  2. [ ] 予定変更し、init処理を最初の方へ持ってくる
+  3. [ ] MikanBootを参考にメモリダンプ機能の追加
+  4. [ ] WcatOSに渡すヘッダーファイルをmultibootやMikanosを参考に完成させる
+  5. [ ] ACPIのサポート
   

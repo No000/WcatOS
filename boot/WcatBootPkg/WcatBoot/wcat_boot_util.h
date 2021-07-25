@@ -7,6 +7,6 @@
 /* watchdogタイマの無効化
    5分刻みで再起動してしまうのを防ぐ。 */
 EFI_STATUS watchdogtimer_disable();
-VOID print_rootdir(EFI_FILE_PROTOCOL *root);
+EFI_STATUS print_rootdir(EFI_FILE_PROTOCOL *root);
 
 #endif
