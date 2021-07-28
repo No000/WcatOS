@@ -271,10 +271,20 @@ typedef struct {
 
 #pragma pack()
 
+struct WCAT_HEADER *wcat_information;
+
 void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   int i;
   uint8_t output_data[14] = "kernel_success";
 
+  wcat_information->video_information.frame_buffer_addr = wcat_boot_information->video_information.frame_buffer_addr;
+  wcat_information->video_information.frame_buffer_size = wcat_boot_information->video_information.frame_buffer_size;
+  wcat_information->video_information.horizen_size =  wcat_boot_information->video_information.horizen_size;
+  wcat_information->video_information.vertical_size = wcat_boot_information->video_information.vertical_size;
+  wcat_information->video_information.pixel_per_scanline = wcat_boot_information->video_information.pixel_per_scanline;
+
+      
+  
   for (i = 0; i < 14; i++){
     serialport_output(output_data[i]);
   }
@@ -285,15 +295,15 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
 
   
   pixel_bit_mask *frame_buffer =
-      (pixel_bit_mask *)wcat_boot_information->video_information.frame_buffer_addr;
-  for (uint32_t i = 0; i < wcat_boot_information->video_information.frame_buffer_size; ++i) {
+      (pixel_bit_mask *)wcat_information->video_information.frame_buffer_addr;
+  for (uint32_t i = 0; i < wcat_information->video_information.frame_buffer_size; ++i) {
     frame_buffer[i].red_mask = 0xad;
     frame_buffer[i].green_mask = 0xff;
     frame_buffer[i].blue_mask = 0x2f;
   }
-  drow_pixel(1, 100, BLACK, wcat_boot_information->video_information);
-  drow_horizon_pixel(100, 100, 500, BLACK, wcat_boot_information->video_information);
-  drow_vertical_pixel(100, 100, 300, BLACK, wcat_boot_information->video_information);
+  drow_pixel(1, 100, BLACK, wcat_information->video_information);
+  drow_horizon_pixel(100, 100, 500, BLACK, wcat_information->video_information);
+  drow_vertical_pixel(100, 100, 300, BLACK, wcat_information->video_information);
 
   
 
