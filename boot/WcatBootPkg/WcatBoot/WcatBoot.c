@@ -60,6 +60,8 @@ struct MemoryMap {
     uint32_t descriptor_version;
 };
 
+
+
 EFI_STATUS
 EFIAPI
 UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
@@ -76,7 +78,7 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
 
 
     /* GOP初期化設定 */
-    EFI_GRAPHICS_OUTPUT_PROTOCOL *gop;
+    EFI_GRAPHICS_OUTPUT_PROTOCOL *gop = NULL;
     UINTN num_gop_handles = 0;	/*  */
     EFI_HANDLE *gop_handles = NULL;
 

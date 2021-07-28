@@ -4,4 +4,7 @@
   3. [ ] MikanBootを参考にメモリダンプ機能の追加
   4. [ ] WcatOSに渡すヘッダーファイルをmultibootやMikanosを参考に完成させる
   5. [ ] ACPIのサポート
+  6. [ ] kernelビルドのincludeパスを追加し、includeを楽にする(kernel/以下のを一つ一つピックアップ)
+  7. [ ] wcatosの初期化チェック処理をする。(smbiosのアンカーを見てチェックなど)
+  8. [ ] printk以外としてpanic関数を追加
   
