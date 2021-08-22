@@ -21,7 +21,7 @@ void drow_back_color(uint8_t red, uint8_t green, uint8_t blue){
 }
 
 /* 1ピクセル描画関数 */
-void drow_pixel(uint32_t x, uint32_t y, color pixel_color, VIDEO_INFO video_infomation) {
+void drow_pixel(uint32_t x, uint32_t y, COLOR pixel_color, VIDEO_INFO video_infomation) {
   pixel_bit_mask *p = (pixel_bit_mask *)video_infomation.frame_buffer_addr;
   uint32_t hr = video_infomation.horizen_size;
   pixel_bit_mask *draw_pixel_address = p + (hr * y) + x;
@@ -31,7 +31,7 @@ void drow_pixel(uint32_t x, uint32_t y, color pixel_color, VIDEO_INFO video_info
 }
 
 /* 水平描画関数 */
-void drow_horizon_pixel(uint32_t start_x, uint32_t start_y, uint32_t end_x, color pixel_color, VIDEO_INFO video_info)
+void drow_horizon_pixel(uint32_t start_x, uint32_t start_y, uint32_t end_x, COLOR pixel_color, VIDEO_INFO video_info)
 {
   int i = 0;
   for (i = start_x; i < end_x; i++) {
@@ -40,7 +40,7 @@ void drow_horizon_pixel(uint32_t start_x, uint32_t start_y, uint32_t end_x, colo
 }
 
 /* 垂直描画関数 */
-void drow_vertical_pixel(uint32_t start_x, uint32_t start_y, uint32_t end_y, color pixel_color, VIDEO_INFO video_info) {
+void drow_vertical_pixel(uint32_t start_x, uint32_t start_y, uint32_t end_y, COLOR pixel_color, VIDEO_INFO video_info) {
   int i = 0;
   for (i = start_y; i < end_y; i++) {
     drow_pixel(start_x, i, pixel_color, video_info);
