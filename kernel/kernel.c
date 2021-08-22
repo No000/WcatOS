@@ -233,7 +233,7 @@ typedef struct {
 
 /* 全体に公開するための */
 struct WCAT_HEADER *wcat_information;
-
+struct WCATOS_CONTOROL_INFORMATION *wcat_contorol_information;
 
 
 
@@ -241,7 +241,7 @@ struct WCAT_HEADER *wcat_information;
 void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   gop_init(wcat_boot_information);
   drow_back_color(0xad, 0xff, 0x2f);
-
+  terminal_init();
 
   /* int i; */
   /* uint8_t output_data[14] = "kernel_success"; */
@@ -258,7 +258,8 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
 
   int i = 1234;
   k_print(wcat_boot_information->video_information, BLACK, "dec: %d hex: %x bin: %b ", sizeof(i), i, i);
-
+  k_print(wcat_boot_information->video_information, BLACK, "\t");
+  k_print(wcat_boot_information->video_information, BLACK, "test");
 
 
   SMBIOS_TABLE_ENTRY_POINT *smtable;
