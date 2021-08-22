@@ -29,18 +29,17 @@ PUBLIC void print_test(uint64_t i_i, VIDEO_INFO video_info, color pixel_color);
 
 
 
-
+#define MAX64_DIGIT 64
 PUBLIC void k_print(VIDEO_INFO video_info, color pixel_color,const char* format, ... ){
       va_list ap;
       va_start(ap, format);
 
       char* string_buff;
-      int i = 0;
       
-      for (string_buff = format; *string_buff != '\0'; string_buff++, i++) {
+      for (string_buff = format; *string_buff != '\0'; string_buff++) {
           if (*string_buff == '%') {
               string_buff++;
-              i++;
+              /* i++; */
               switch (*string_buff) {
               case 's':
                   print_string(va_arg(ap, char *),video_info, pixel_color);
@@ -51,14 +50,39 @@ PUBLIC void k_print(VIDEO_INFO video_info, color pixel_color,const char* format,
               case 'c':
                   print_char(va_arg(ap, int), video_info, pixel_color);
                   break;
+              case 'd':
+                  char dec_s[MAX64_DIGIT];
+                  uint64_t dec_len;
+                  dec_len = dec2asc(dec_s, va_arg(ap, uint64_t));
+                  for (int i = 0; i < dec_len; i++) {
+                      print_char(dec_s[i], video_info, pixel_color);
+                  }
+                  break;
+              case 'x':
+                  char hex_s[MAX64_DIGIT];
+                  uint64_t hex_len;
+                  hex_len = hex2asc(hex_s, va_arg(ap, uint64_t));
+                  for (int i = 0; i < hex_len; i++) {
+                      print_char(hex_s[i], video_info, pixel_color);
+                  }
+                  break;
+              case 'b':
+                  char bin_s[MAX64_DIGIT];
+                  uint64_t bin_len;
+                  bin_len = bin2asc(bin_s, va_arg(ap, uint64_t));
+                  for (int i = 0; i < bin_len; i++) {
+                      print_char(bin_s[i], video_info, pixel_color);
+                  }
+                  break;
               }
           } else {
-              print_char(string_buff[i], video_info, pixel_color); /* うごいてない？ */
+              print_char(string_buff[0], video_info, pixel_color); /* ポインタを直接動かしているので先頭のみを表示 */
           }
       }
 
       va_end(ap);
 }
+
 
 PUBLIC void print_char(char c, VIDEO_INFO video_info, color pixel_color) {
   int x = 0, y = 0;
@@ -137,12 +161,4 @@ PRIVATE uint64_t bin2asc(char *str, uint64_t bin){
 }
 
 
-#define MAX64_DIGIT 64
-PUBLIC void print_test(uint64_t i_i, VIDEO_INFO video_info, color pixel_color){
-    char s[MAX64_DIGIT];
-    uint64_t len;
-    len = hex2asc(s, i_i);
-    for (int i = 0; i < len; i++) {
-        print_char(s[i], video_info, pixel_color);
-    }
-}
+

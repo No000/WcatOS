@@ -16,6 +16,7 @@
 #include "font.h"
 #include "io.h"
 #include "../boot/WcatBootPkg/WcatBoot/wcat_boot_header.h" /* シンボリックリンクに変更をする */
+#include "wcatos_info.h"
 
 #define FONT_HEIGHT 10
 #define FONT_WIDTH 8
@@ -230,6 +231,7 @@ typedef struct {
 
 #pragma pack()
 
+/* 全体に公開するための */
 struct WCAT_HEADER *wcat_information;
 
 
@@ -257,7 +259,6 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
 
 
 
-  /* 背景描画を行う */
 
   /* for (i = 0; i < 14; i++){ */
   /*   serialport_output(output_data[i]); */
@@ -267,11 +268,8 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   /* out8(0x60, 0xad); */
 
 
-
-  k_print(wcat_boot_information->video_information, BLACK, "%% %s %s", "ascasdc", "testtest");
-  k_print(wcat_boot_information->video_information, BLACK, "s");
-  k_print(wcat_boot_information->video_information, BLACK, "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
-  print_string("sssssssssssssssssssssssssssssssssssss", wcat_boot_information->video_information, BLACK);
+  int i = 1234;
+  k_print(wcat_boot_information->video_information, BLACK, "dec: %d hex: %x bin: %b ", i, i, i);
 
 
 
