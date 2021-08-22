@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdarg.h>
 #include "graphic.h"
 #include "font.h"
 #include "print.h"
@@ -19,6 +20,46 @@ PRIVATE uint64_t hex2asc(char *str, uint64_t dec);
 PRIVATE uint64_t dec2asc(char *str, uint64_t dec);
 PRIVATE uint64_t bin2asc(char *str, uint64_t bin);
 
+
+PUBLIC void print_char(char c, VIDEO_INFO video_info, color pixel_color);
+PUBLIC void print_string(char* string, VIDEO_INFO vudeo_info, color pixel_color);
+PUBLIC void print_test(uint64_t i_i, VIDEO_INFO video_info, color pixel_color);
+
+
+
+
+
+
+PUBLIC void k_print(VIDEO_INFO video_info, color pixel_color,const char* format, ... ){
+      va_list ap;
+      va_start(ap, format);
+
+      char* string_buff;
+      int i = 0;
+      
+      for (string_buff = format; *string_buff != '\0'; string_buff++, i++) {
+          if (*string_buff == '%') {
+              string_buff++;
+              i++;
+              switch (*string_buff) {
+              case 's':
+                  print_string(va_arg(ap, char *),video_info, pixel_color);
+                  break;
+              case '%':
+                  print_char('%', video_info, pixel_color);
+                  break;
+              case 'c':
+                  print_char(va_arg(ap, int), video_info, pixel_color);
+                  break;
+              }
+          } else {
+              print_char(string_buff[i], video_info, pixel_color); /* うごいてない？ */
+          }
+      }
+
+      va_end(ap);
+}
+
 PUBLIC void print_char(char c, VIDEO_INFO video_info, color pixel_color) {
   int x = 0, y = 0;
   /* 実験なのでインデックスは0固定 */
@@ -38,10 +79,10 @@ PUBLIC void print_char(char c, VIDEO_INFO video_info, color pixel_color) {
   }
 }
 
-PUBLIC void print_string(char* string, VIDEO_INFO vudeo_info, color pixel_color) {
+PUBLIC void print_string(char* string, VIDEO_INFO video_info, color pixel_color) {
   int i = 0;
   while (string[i] != '\0') {
-	print_char(string[i], vudeo_info, pixel_color);
+	print_char(string[i], video_info, pixel_color);
 	i++;
   }
 }

@@ -20,7 +20,10 @@ typedef struct pixel_bit_mask{
 } pixel_bit_mask;
 
 
+void gop_init(struct WCAT_HEADER *wcat_boot_information);
 
+
+void drow_back_color(uint8_t red, uint8_t green, uint8_t blue);
 
 void drow_pixel(uint32_t x, uint32_t y, color pixel_color,
                 VIDEO_INFO video_infomation);

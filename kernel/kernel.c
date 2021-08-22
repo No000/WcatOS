@@ -171,16 +171,6 @@ const char keymap[] = {         /* keycodeの返り値を位置情報にして�
     0x00
 };
 
-/* static char keymap[0x80] = { */
-/*     0,   0,   '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '^', 0,   0, */
-/*     'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '@', '[', 0,   0,   'A', 'S', */
-/*     'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', ':', 0,   0,   ']', 'Z', 'X', 'C', 'V', */
-/*     'B', 'N', 'M', ',', '.', '/', 0,   '*', 0,   ' ', 0,   0,   0,   0,   0,   0, */
-/*     0,   0,   0,   0,   0,   0,   0,   '7', '8', '9', '-', '4', '5', '6', '+', '1', */
-/*     '2', '3', '0', '.', 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, */
-/*     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, */
-/*     0,   0,   0,   0x5c, 0,  0,   0,   0,   0,   0,   0,   0,   0,   0x5c, 0,  0 */
-/*     }; */
 
 void wait_KBC_sendReady(void){
     while (1) {
@@ -213,37 +203,6 @@ char getc(void)
 	return keymap[get_keycode()];
 }
 
-#include <stdarg.h>
-
-
-
-void printk(VIDEO_INFO video_info, color pixel_color,const char* format, ... ){
-      va_list ap;
-      va_start(ap, format);
-
-      char* string_buff;
-      int i = 0;
-      
-      for (string_buff = format; *string_buff != '\0'; string_buff++, i++) {
-          if (*string_buff == '%') {
-              string_buff++;
-              switch (*string_buff) {
-                  case 's':
-                      print_string(va_arg(ap, char *),video_info, pixel_color);
-                      break;
-                 case '%':
-                      print_char('%', video_info, pixel_color);
-                      break;
-              }
-              
-             } else {
-               print_char(string_buff[i], video_info, pixel_color);
-
-            }
-           }
-
-           va_end(ap);
-}
 
 #pragma pack(1)
 typedef struct {
@@ -273,62 +232,59 @@ typedef struct {
 
 struct WCAT_HEADER *wcat_information;
 
+
+
+
+
 void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
-  int i;
-  uint8_t output_data[14] = "kernel_success";
+  gop_init(wcat_boot_information);
+  drow_back_color(0xad, 0xff, 0x2f);
 
-  wcat_information->video_information.frame_buffer_addr = wcat_boot_information->video_information.frame_buffer_addr;
-  wcat_information->video_information.frame_buffer_size = wcat_boot_information->video_information.frame_buffer_size;
-  wcat_information->video_information.horizen_size =  wcat_boot_information->video_information.horizen_size;
-  wcat_information->video_information.vertical_size = wcat_boot_information->video_information.vertical_size;
-  wcat_information->video_information.pixel_per_scanline = wcat_boot_information->video_information.pixel_per_scanline;
 
-      
+
+
+
   
-  for (i = 0; i < 14; i++){
-    serialport_output(output_data[i]);
-  }
+  /* uint64_t test_val = 10; */
+  /* print_test(test_val, wcat_boot_information->video_information, BLACK); */
+
+  /* print_test(wcat_boot_information->video_information.horizen_size, wcat_boot_information->video_information, BLACK); */
+  /* print_string(" ", wcat_boot_information->video_information, BLACK); */
+
+
+  /* int i; */
+  /* uint8_t output_data[14] = "kernel_success"; */
+
+
+
+  /* 背景描画を行う */
+
+  /* for (i = 0; i < 14; i++){ */
+  /*   serialport_output(output_data[i]); */
+  /* } */
+
+  wait_KBC_sendReady();
+  /* out8(0x60, 0xad); */
+
+
+
+  k_print(wcat_boot_information->video_information, BLACK, "%% %s %s", "ascasdc", "testtest");
+  k_print(wcat_boot_information->video_information, BLACK, "s");
+  k_print(wcat_boot_information->video_information, BLACK, "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
+  print_string("sssssssssssssssssssssssssssssssssssss", wcat_boot_information->video_information, BLACK);
+
+
 
   SMBIOS_TABLE_ENTRY_POINT *smtable;
   smtable = (SMBIOS_TABLE_ENTRY_POINT*)(wcat_boot_information->smbios_address);
-
-
-  
-  pixel_bit_mask *frame_buffer =
-      (pixel_bit_mask *)wcat_information->video_information.frame_buffer_addr;
-  for (uint32_t i = 0; i < wcat_information->video_information.frame_buffer_size; ++i) {
-    frame_buffer[i].red_mask = 0xad;
-    frame_buffer[i].green_mask = 0xff;
-    frame_buffer[i].blue_mask = 0x2f;
-  }
-  drow_pixel(1, 100, BLACK, wcat_information->video_information);
-  drow_horizon_pixel(100, 100, 500, BLACK, wcat_information->video_information);
-  drow_vertical_pixel(100, 100, 300, BLACK, wcat_information->video_information);
-
-  
-
-
-  uint64_t test_val = 10;
-
-  print_test(test_val, wcat_boot_information->video_information, BLACK);
-
-  print_test(wcat_boot_information->video_information.horizen_size, wcat_boot_information->video_information, BLACK);
-  print_string(" ", wcat_boot_information->video_information, BLACK);
-
-
-
-
-  wait_KBC_sendReady();
-  out8(0x60, 0xad);
-
-
-
-  printk(wcat_boot_information->video_information, BLACK, "%% %s %s", "ascasdc", "testtest");
-
-  print_char(smtable->AnchorString[0], wcat_boot_information->video_information, BLACK);
-  print_char(smtable->AnchorString[1], wcat_boot_information->video_information, BLACK);
-  print_char(smtable->AnchorString[2], wcat_boot_information->video_information, BLACK);
-  print_char(smtable->AnchorString[3], wcat_boot_information->video_information, BLACK);
+  k_print(wcat_boot_information->video_information, BLACK, "%c", smtable->AnchorString[0]);
+  k_print(wcat_boot_information->video_information, BLACK, "%c", smtable->AnchorString[1]);
+  k_print(wcat_boot_information->video_information, BLACK, "%c", smtable->AnchorString[2]);
+  k_print(wcat_boot_information->video_information, BLACK, "%c", smtable->AnchorString[3]);
+ /*  print_char(smtable->AnchorString[0], wcat_boot_information->video_information, BLACK); */
+/*   print_char(smtable->AnchorString[1], wcat_boot_information->video_information, BLACK); */
+/*   print_char(smtable->AnchorString[2], wcat_boot_information->video_information, BLACK); */
+/*   print_char(smtable->AnchorString[3], wcat_boot_information->video_information, BLACK); */
   while (1) {
 		char c = getc();
         if (c == '\n')
@@ -336,18 +292,6 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
 
         print_char(c, wcat_boot_information->video_information, BLACK);
 	}
-  /* out8(0x0064, 0xf4); */
-  /* unsigned char test_data = 0; */
-  /* while (1) { */
-  /*       test_data = in8(KBC_DATA_ADDR); */
-  /*       print_test(test_data, wcat_boot_information->video_information, BLACK); */
-  /*         } */
-  /* test_data = in8(0x0060); */
-  /* print_test(test_data, wcat_boot_information->video_information, BLACK); */
-  /* while (1) { */
-  /*     unsigned char c = get_keycode(); */
-  /*     print_test(c, wcat_boot_information->video_information, BLACK); */
-  /*         } */
 
   while (1)
     hlt();
