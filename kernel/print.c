@@ -15,26 +15,22 @@ PUBLIC uint32_t cursor_x = 0;
 PUBLIC uint32_t cursor_y = 0;
 
 PRIVATE uint64_t bin2asc(char *str, uint64_t bin);
-/* PRIVATE void print_char(char c, VIDEO_INFO video_info, color pixel_color); */
 PRIVATE uint64_t hex2asc(char *str, uint64_t dec);
 PRIVATE uint64_t dec2asc(char *str, uint64_t dec);
-PRIVATE uint64_t bin2asc(char *str, uint64_t bin);
-
-
-PUBLIC void print_char(char c, VIDEO_INFO video_info, color pixel_color);
-PUBLIC void print_string(char* string, VIDEO_INFO vudeo_info, color pixel_color);
-PUBLIC void print_test(uint64_t i_i, VIDEO_INFO video_info, color pixel_color);
+PRIVATE void print_char(char c, VIDEO_INFO video_info, color pixel_color);
+PRIVATE void print_string(char* string, VIDEO_INFO vudeo_info, color pixel_color);
+PRIVATE void print_test(uint64_t i_i, VIDEO_INFO video_info, color pixel_color);
 
 
 
 
-
+/* %0x系はsizeofを使えばいい */
 #define MAX64_DIGIT 64
 PUBLIC void k_print(VIDEO_INFO video_info, color pixel_color,const char* format, ... ){
       va_list ap;
       va_start(ap, format);
 
-      char* string_buff;
+      const char* string_buff;
       
       for (string_buff = format; *string_buff != '\0'; string_buff++) {
           if (*string_buff == '%') {
@@ -85,30 +81,30 @@ PUBLIC void k_print(VIDEO_INFO video_info, color pixel_color,const char* format,
 
 
 PUBLIC void print_char(char c, VIDEO_INFO video_info, color pixel_color) {
-  int x = 0, y = 0;
-  /* 実験なのでインデックスは0固定 */
-  for (y = 0; y < FONT_HEIGHT; y++) {
-    for (x = 0; x < FONT_WIDTH; x++) {
-      if (font_bitmap[(uint32_t)c][y][x])
-        drow_pixel(cursor_x + x, cursor_y + y, pixel_color, video_info);
+    int x = 0, y = 0;
+    /* 実験なのでインデックスは0固定 */
+    for (y = 0; y < FONT_HEIGHT; y++) {
+        for (x = 0; x < FONT_WIDTH; x++) {
+            if (font_bitmap[(uint32_t)c][y][x])
+                drow_pixel(cursor_x + x, cursor_y + y, pixel_color, video_info);
+        }
     }
-  }
-  cursor_x += FONT_WIDTH;
-  if ((cursor_x + FONT_WIDTH) >= video_info.horizen_size) {
-	cursor_x =0;
-	cursor_y += FONT_HEIGHT;
-	if ((cursor_y + FONT_HEIGHT) >= video_info.vertical_size) {
-	  cursor_x = cursor_y = 0;
-	}
-  }
+    cursor_x += FONT_WIDTH;
+    if ((cursor_x + FONT_WIDTH) >= video_info.horizen_size) {
+        cursor_x =0;
+        cursor_y += FONT_HEIGHT;
+        if ((cursor_y + FONT_HEIGHT) >= video_info.vertical_size) {
+            cursor_x = cursor_y = 0;
+        }
+    }
 }
 
 PUBLIC void print_string(char* string, VIDEO_INFO video_info, color pixel_color) {
-  int i = 0;
-  while (string[i] != '\0') {
-	print_char(string[i], video_info, pixel_color);
-	i++;
-  }
+    int i = 0;
+    while (string[i] != '\0') {
+        print_char(string[i], video_info, pixel_color);
+        i++;
+    }
 }
 
 //16進数からASCIIコードに変換
