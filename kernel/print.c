@@ -24,7 +24,7 @@ PRIVATE uint64_t bin2asc(char *str, uint64_t bin);
 PRIVATE uint64_t hex2asc(char *str, uint64_t dec);
 PRIVATE uint64_t dec2asc(char *str, uint64_t dec);
 PRIVATE void draw_char(char c, VIDEO_INFO video_info);
-PRIVATE void print_string(char* string, VIDEO_INFO vudeo_info, COLOR pixel_color);
+PRIVATE void print_string(char* string, VIDEO_INFO vudeo_info);
 
 PUBLIC void k_terminal_init(){
     CURSOR_X = 0;
@@ -38,7 +38,7 @@ PUBLIC void k_font_color_change(COLOR color){
 
 /* %0x系はsizeofを使えばいい */
 #define MAX64_DIGIT 64
-PUBLIC void k_print(VIDEO_INFO video_info, COLOR pixel_color,const char* format, ... ){
+PUBLIC void k_print(VIDEO_INFO video_info, const char* format, ... ){
       va_list ap;
       va_start(ap, format);
 
@@ -50,7 +50,7 @@ PUBLIC void k_print(VIDEO_INFO video_info, COLOR pixel_color,const char* format,
               /* i++; */
               switch (*string_buff) {
               case 's':
-                  print_string(va_arg(ap, char *),video_info, pixel_color);
+                  print_string(va_arg(ap, char *), video_info);
                   break;
               case '%':
                   draw_char('%', video_info);
@@ -124,7 +124,7 @@ PRIVATE void draw_char(char c, VIDEO_INFO video_info) {
     }
 }
 
-PRIVATE void print_string(char* string, VIDEO_INFO video_info, COLOR pixel_color) {
+PRIVATE void print_string(char* string, VIDEO_INFO video_info) {
     int i = 0;
     while (string[i] != '\0') {
         draw_char(string[i], video_info);

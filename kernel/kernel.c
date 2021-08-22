@@ -249,26 +249,24 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
 
 
   int i = 1234;
-  k_print(wcat_boot_information->video_information, BLACK, "dec: %d hex: %x bin: %b ", sizeof(i), i, i);
-  k_print(wcat_boot_information->video_information, BLACK, "\t");
-  k_print(wcat_boot_information->video_information, BLACK, "\ra\ra\ra\raa\n\n\na");
+  k_print(wcat_boot_information->video_information, "dec: %d hex: %x bin: %b ", sizeof(i), i, i);
 
 
   SMBIOS_TABLE_ENTRY_POINT *smtable;
   smtable = (SMBIOS_TABLE_ENTRY_POINT*)(wcat_boot_information->smbios_address);
-  k_print(wcat_boot_information->video_information, AQUA, "%c", smtable->AnchorString[0]);
-  k_print(wcat_boot_information->video_information, BLACK, "%c", smtable->AnchorString[1]);
-  k_print(wcat_boot_information->video_information, BLACK, "%c", smtable->AnchorString[2]);
-  k_print(wcat_boot_information->video_information, BLACK, "%c", smtable->AnchorString[3]);
+  k_print(wcat_boot_information->video_information, "%c", smtable->AnchorString[0]);
+  k_print(wcat_boot_information->video_information, "%c", smtable->AnchorString[1]);
+  k_print(wcat_boot_information->video_information, "%c", smtable->AnchorString[2]);
+  k_print(wcat_boot_information->video_information, "%c", smtable->AnchorString[3]);
   while (1) {
 		char c = getc();
 
         if (('!' <= c) && (c <= '~')){
-            k_print(wcat_boot_information->video_information, WHITE, "%c", c);
+            k_print(wcat_boot_information->video_information, "%c", c);
         } else if (c =='\n'){
-            k_print(wcat_boot_information->video_information, AQUA, "\r");
+            k_print(wcat_boot_information->video_information, "\r");
         } else if (c == ' '){
-            k_print(wcat_boot_information->video_information, AQUA, " ");
+            k_print(wcat_boot_information->video_information, " ");
         }
 	}
 
