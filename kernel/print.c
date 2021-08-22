@@ -16,14 +16,18 @@ extern WCATOS_CONTOROL_INFORMATION *wcat_contorol_information;
 #define CURSOR_X wcat_contorol_information->kernel_terminal_information.cursor_x
 #define CURSOR_Y wcat_contorol_information->kernel_terminal_information.cursor_y
 
+#define TAB_WIDTH 4             /* 構造体で管理するようにする */
+
 PRIVATE uint64_t bin2asc(char *str, uint64_t bin);
 PRIVATE uint64_t hex2asc(char *str, uint64_t dec);
 PRIVATE uint64_t dec2asc(char *str, uint64_t dec);
 PRIVATE void draw_char(char c, VIDEO_INFO video_info, color pixel_color);
 PRIVATE void print_string(char* string, VIDEO_INFO vudeo_info, color pixel_color);
-PRIVATE void draw_control_char(char c, VIDEO_INFO video_info, color pixel_color);
 
-
+PUBLIC void terminal_init(){
+    CURSOR_X = 0;
+    CURSOR_Y = 0;
+}
 
 /* %0x系はsizeofを使えばいい */
 #define MAX64_DIGIT 64
@@ -80,18 +84,27 @@ PUBLIC void k_print(VIDEO_INFO video_info, color pixel_color,const char* format,
 }
 
 
-
 /* ASCIIの処理もここで行ってる */
 PRIVATE void draw_char(char c, VIDEO_INFO video_info, color pixel_color) {
     int x = 0, y = 0;
     /* 実験なのでインデックスは0固定 */
-    for (y = 0; y < FONT_HEIGHT; y++) {
-        for (x = 0; x < FONT_WIDTH; x++) {
-            if (font_bitmap[(uint32_t)c][y][x])
-                drow_pixel(CURSOR_X + x, CURSOR_Y + y, pixel_color, video_info);
-        }
+    switch (c) {
+    case '\r':
+        /* draw_control_char(c); */
+        CURSOR_Y += FONT_HEIGHT;
+        break;
+    case '\t':
+        CURSOR_X += (TAB_WIDTH * FONT_WIDTH);
+        break;
+    default:
+            for (y = 0; y < FONT_HEIGHT; y++) {
+                for (x = 0; x < FONT_WIDTH; x++) {
+                    if (font_bitmap[(uint32_t)c][y][x])
+                        drow_pixel(CURSOR_X + x, CURSOR_Y + y, pixel_color, video_info);
+                }
+            }
+            CURSOR_X += FONT_WIDTH;
     }
-    CURSOR_X += FONT_WIDTH;
     if ((CURSOR_X + FONT_WIDTH) >= video_info.horizen_size) {
         CURSOR_X =0;
         CURSOR_Y += FONT_HEIGHT;
