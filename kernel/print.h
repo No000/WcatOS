@@ -10,5 +10,6 @@
 
 void k_print(VIDEO_INFO video_info, COLOR pixel_color,const char* format, ... );
 void k_terminal_init();
+void k_font_color_change(COLOR color);
 
 #endif

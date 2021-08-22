@@ -4,6 +4,7 @@
 #include "font.h"
 #include "print.h"
 #include "wcatos_info.h"
+#include "color.h"
 
 #define PRIVATE static
 #define PUBLIC                  /* extern ok */
@@ -15,23 +16,29 @@
 extern WCATOS_CONTOROL_INFORMATION *wcat_contorol_information;
 #define CURSOR_X wcat_contorol_information->kernel_terminal_information.cursor_x
 #define CURSOR_Y wcat_contorol_information->kernel_terminal_information.cursor_y
+#define TERMINAL_FONT_COLOR wcat_contorol_information->kernel_terminal_information.terminal_font_color
 
 #define TAB_WIDTH 4             /* 構造体で管理するようにする */
 
 PRIVATE uint64_t bin2asc(char *str, uint64_t bin);
 PRIVATE uint64_t hex2asc(char *str, uint64_t dec);
 PRIVATE uint64_t dec2asc(char *str, uint64_t dec);
-PRIVATE void draw_char(char c, VIDEO_INFO video_info, color pixel_color);
-PRIVATE void print_string(char* string, VIDEO_INFO vudeo_info, color pixel_color);
+PRIVATE void draw_char(char c, VIDEO_INFO video_info);
+PRIVATE void print_string(char* string, VIDEO_INFO vudeo_info, COLOR pixel_color);
 
-PUBLIC void terminal_init(){
+PUBLIC void k_terminal_init(){
     CURSOR_X = 0;
     CURSOR_Y = 0;
+    TERMINAL_FONT_COLOR = BLACK;
+}
+
+PUBLIC void k_font_color_change(COLOR color){
+    TERMINAL_FONT_COLOR = color;
 }
 
 /* %0x系はsizeofを使えばいい */
 #define MAX64_DIGIT 64
-PUBLIC void k_print(VIDEO_INFO video_info, color pixel_color,const char* format, ... ){
+PUBLIC void k_print(VIDEO_INFO video_info, COLOR pixel_color,const char* format, ... ){
       va_list ap;
       va_start(ap, format);
 
@@ -46,17 +53,17 @@ PUBLIC void k_print(VIDEO_INFO video_info, color pixel_color,const char* format,
                   print_string(va_arg(ap, char *),video_info, pixel_color);
                   break;
               case '%':
-                  draw_char('%', video_info, pixel_color);
+                  draw_char('%', video_info);
                   break;
               case 'c':
-                  draw_char(va_arg(ap, int), video_info, pixel_color);
+                  draw_char(va_arg(ap, int), video_info);
                   break;
               case 'd':
                   char dec_s[MAX64_DIGIT];
                   uint64_t dec_len;
                   dec_len = dec2asc(dec_s, va_arg(ap, uint64_t));
                   for (int i = 0; i < dec_len; i++) {
-                      draw_char(dec_s[i], video_info, pixel_color);
+                      draw_char(dec_s[i], video_info);
                   }
                   break;
               case 'x':
@@ -64,7 +71,7 @@ PUBLIC void k_print(VIDEO_INFO video_info, color pixel_color,const char* format,
                   uint64_t hex_len;
                   hex_len = hex2asc(hex_s, va_arg(ap, uint64_t));
                   for (int i = 0; i < hex_len; i++) {
-                      draw_char(hex_s[i], video_info, pixel_color);
+                      draw_char(hex_s[i], video_info);
                   }
                   break;
               case 'b':
@@ -72,12 +79,12 @@ PUBLIC void k_print(VIDEO_INFO video_info, color pixel_color,const char* format,
                   uint64_t bin_len;
                   bin_len = bin2asc(bin_s, va_arg(ap, uint64_t));
                   for (int i = 0; i < bin_len; i++) {
-                      draw_char(bin_s[i], video_info, pixel_color);
+                      draw_char(bin_s[i], video_info);
                   }
                   break;
               }
           } else {
-              draw_char(string_buff[0], video_info, pixel_color); /* ポインタを直接動かしているので先頭のみを表示 */
+              draw_char(string_buff[0], video_info); /* ポインタを直接動かしているので先頭のみを表示 */
           }
       }
       va_end(ap);
@@ -85,7 +92,7 @@ PUBLIC void k_print(VIDEO_INFO video_info, color pixel_color,const char* format,
 
 
 /* ASCIIの処理もここで行ってる */
-PRIVATE void draw_char(char c, VIDEO_INFO video_info, color pixel_color) {
+PRIVATE void draw_char(char c, VIDEO_INFO video_info) {
     int x = 0, y = 0;
     /* 実験なのでインデックスは0固定 */
     switch (c) {
@@ -96,14 +103,17 @@ PRIVATE void draw_char(char c, VIDEO_INFO video_info, color pixel_color) {
     case '\t':
         CURSOR_X += (TAB_WIDTH * FONT_WIDTH);
         break;
+    case '\n':
+        CURSOR_Y += FONT_HEIGHT;
+        break;
     default:
-            for (y = 0; y < FONT_HEIGHT; y++) {
-                for (x = 0; x < FONT_WIDTH; x++) {
-                    if (font_bitmap[(uint32_t)c][y][x])
-                        drow_pixel(CURSOR_X + x, CURSOR_Y + y, pixel_color, video_info);
-                }
+        for (y = 0; y < FONT_HEIGHT; y++) {
+            for (x = 0; x < FONT_WIDTH; x++) {
+                if (font_bitmap[(uint32_t)c][y][x])
+                    drow_pixel(CURSOR_X + x, CURSOR_Y + y, TERMINAL_FONT_COLOR, video_info);
             }
-            CURSOR_X += FONT_WIDTH;
+        }
+        CURSOR_X += FONT_WIDTH;
     }
     if ((CURSOR_X + FONT_WIDTH) >= video_info.horizen_size) {
         CURSOR_X =0;
@@ -114,10 +124,10 @@ PRIVATE void draw_char(char c, VIDEO_INFO video_info, color pixel_color) {
     }
 }
 
-PRIVATE void print_string(char* string, VIDEO_INFO video_info, color pixel_color) {
+PRIVATE void print_string(char* string, VIDEO_INFO video_info, COLOR pixel_color) {
     int i = 0;
     while (string[i] != '\0') {
-        draw_char(string[i], video_info, pixel_color);
+        draw_char(string[i], video_info);
         i++;
     }
 }
@@ -173,4 +183,5 @@ PRIVATE uint64_t bin2asc(char *str, uint64_t bin){
 
 #undef CURSOR_X
 #undef CURSOR_Y
+#undef TERMINAL_FONT_COLOR
 
