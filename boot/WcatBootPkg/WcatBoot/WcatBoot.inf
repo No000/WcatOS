@@ -15,6 +15,7 @@
   menu/settings_menu/settings_menu.c
   menu/information/information.c
   util.c
+  gop.c
 
 [Packages]
   MdePkg/MdePkg.dec

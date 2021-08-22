@@ -36,6 +36,7 @@
 
 #include "util.h"
 #include "wcat_boot_util.h"
+#include "gop.h"
 /* ELFヘッダーは */
 
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *SFSP;
@@ -102,11 +103,12 @@ UefiMain(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE *SystemTable) {
     FreePool(gop_handles);		/* この処理が何なのかが気になる */
 
     /* カーネルに渡すグラフィックのデータ(init処理) */
-    wcat_boot_information.video_information.frame_buffer_addr = (uint8_t *)gop->Mode->FrameBufferBase;
-    wcat_boot_information.video_information.frame_buffer_size = (uint64_t)gop->Mode->FrameBufferSize;
-    wcat_boot_information.video_information.horizen_size = (uint32_t)gop->Mode->Info->HorizontalResolution;
-    wcat_boot_information.video_information.vertical_size = (uint32_t)gop->Mode->Info->VerticalResolution;
-    wcat_boot_information.video_information.pixel_per_scanline = (uint32_t)gop->Mode->Info->PixelsPerScanLine;
+    boot_gop_init(&wcat_boot_information, gop);
+    /* wcat_boot_information.video_information.frame_buffer_addr = (uint8_t *)gop->Mode->FrameBufferBase; */
+    /* wcat_boot_information.video_information.frame_buffer_size = (uint64_t)gop->Mode->FrameBufferSize; */
+    /* wcat_boot_information.video_information.horizen_size = (uint32_t)gop->Mode->Info->HorizontalResolution; */
+    /* wcat_boot_information.video_information.vertical_size = (uint32_t)gop->Mode->Info->VerticalResolution; */
+    /* wcat_boot_information.video_information.pixel_per_scanline = (uint32_t)gop->Mode->Info->PixelsPerScanLine; */
 
     /* メニュー表示の処理 */
     boot_menu(&stall_flag);
