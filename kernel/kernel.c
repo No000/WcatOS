@@ -243,17 +243,6 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   drow_back_color(0xad, 0xff, 0x2f);
 
 
-
-
-
-  
-  /* uint64_t test_val = 10; */
-  /* print_test(test_val, wcat_boot_information->video_information, BLACK); */
-
-  /* print_test(wcat_boot_information->video_information.horizen_size, wcat_boot_information->video_information, BLACK); */
-  /* print_string(" ", wcat_boot_information->video_information, BLACK); */
-
-
   /* int i; */
   /* uint8_t output_data[14] = "kernel_success"; */
 
@@ -265,11 +254,10 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   /* } */
 
   wait_KBC_sendReady();
-  /* out8(0x60, 0xad); */
 
 
   int i = 1234;
-  k_print(wcat_boot_information->video_information, BLACK, "dec: %d hex: %x bin: %b ", i, i, i);
+  k_print(wcat_boot_information->video_information, BLACK, "dec: %d hex: %x bin: %b ", sizeof(i), i, i);
 
 
 
@@ -279,16 +267,14 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   k_print(wcat_boot_information->video_information, BLACK, "%c", smtable->AnchorString[1]);
   k_print(wcat_boot_information->video_information, BLACK, "%c", smtable->AnchorString[2]);
   k_print(wcat_boot_information->video_information, BLACK, "%c", smtable->AnchorString[3]);
- /*  print_char(smtable->AnchorString[0], wcat_boot_information->video_information, BLACK); */
-/*   print_char(smtable->AnchorString[1], wcat_boot_information->video_information, BLACK); */
-/*   print_char(smtable->AnchorString[2], wcat_boot_information->video_information, BLACK); */
-/*   print_char(smtable->AnchorString[3], wcat_boot_information->video_information, BLACK); */
   while (1) {
 		char c = getc();
         if (c == '\n')
-            print_char('\r', wcat_boot_information->video_information, BLACK);
+            /* print_char('\r', wcat_boot_information->video_information, BLACK); */
+            k_print(wcat_boot_information->video_information, BLACK, "\r");
 
-        print_char(c, wcat_boot_information->video_information, BLACK);
+        /* print_char(c, wcat_boot_information->video_information, BLACK); */
+        k_print(wcat_boot_information->video_information, BLACK, "%c", c);
 	}
 
   while (1)
