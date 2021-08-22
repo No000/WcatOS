@@ -17,11 +17,12 @@
 #include "io.h"
 #include "../boot/WcatBootPkg/WcatBoot/wcat_boot_header.h" /* シンボリックリンクに変更をする */
 #include "wcatos_info.h"
+#include "color.h"
 
 #define FONT_HEIGHT 10
 #define FONT_WIDTH 8
 
-COLOR BLACK = {0x00, 0x00, 0x00};
+
 
 
 void hlt() {
@@ -240,7 +241,8 @@ struct WCATOS_CONTOROL_INFORMATION *wcat_contorol_information;
 
 void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   gop_init(wcat_boot_information);
-  drow_back_color(0xad, 0xff, 0x2f);
+  /* drow_back_color(0xad, 0xff, 0x2f); */
+  drow_back_color(GREENYELLOW);
   k_terminal_init();
 
   wait_KBC_sendReady();
@@ -254,7 +256,7 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
 
   SMBIOS_TABLE_ENTRY_POINT *smtable;
   smtable = (SMBIOS_TABLE_ENTRY_POINT*)(wcat_boot_information->smbios_address);
-  k_print(wcat_boot_information->video_information, BLACK, "%c", smtable->AnchorString[0]);
+  k_print(wcat_boot_information->video_information, AQUA, "%c", smtable->AnchorString[0]);
   k_print(wcat_boot_information->video_information, BLACK, "%c", smtable->AnchorString[1]);
   k_print(wcat_boot_information->video_information, BLACK, "%c", smtable->AnchorString[2]);
   k_print(wcat_boot_information->video_information, BLACK, "%c", smtable->AnchorString[3]);
@@ -262,11 +264,11 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
 		char c = getc();
 
         if (('!' <= c) && (c <= '~')){
-            k_print(wcat_boot_information->video_information, BLACK, "%c", c);
+            k_print(wcat_boot_information->video_information, WHITE, "%c", c);
         } else if (c =='\n'){
-            k_print(wcat_boot_information->video_information, BLACK, "\r");
+            k_print(wcat_boot_information->video_information, AQUA, "\r");
         } else if (c == ' '){
-            k_print(wcat_boot_information->video_information, BLACK, " ");
+            k_print(wcat_boot_information->video_information, AQUA, " ");
         }
 	}
 
