@@ -21,7 +21,7 @@
 #define FONT_HEIGHT 10
 #define FONT_WIDTH 8
 
-color BLACK = {0x00, 0x00, 0x00};
+COLOR BLACK = {0x00, 0x00, 0x00};
 
 
 void hlt() {
@@ -241,17 +241,7 @@ struct WCATOS_CONTOROL_INFORMATION *wcat_contorol_information;
 void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   gop_init(wcat_boot_information);
   drow_back_color(0xad, 0xff, 0x2f);
-  terminal_init();
-
-  /* int i; */
-  /* uint8_t output_data[14] = "kernel_success"; */
-
-
-
-
-  /* for (i = 0; i < 14; i++){ */
-  /*   serialport_output(output_data[i]); */
-  /* } */
+  k_terminal_init();
 
   wait_KBC_sendReady();
 
@@ -259,7 +249,7 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   int i = 1234;
   k_print(wcat_boot_information->video_information, BLACK, "dec: %d hex: %x bin: %b ", sizeof(i), i, i);
   k_print(wcat_boot_information->video_information, BLACK, "\t");
-  k_print(wcat_boot_information->video_information, BLACK, "test");
+  k_print(wcat_boot_information->video_information, BLACK, "\ra\ra\ra\raa\n\n\na");
 
 
   SMBIOS_TABLE_ENTRY_POINT *smtable;
@@ -270,12 +260,14 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   k_print(wcat_boot_information->video_information, BLACK, "%c", smtable->AnchorString[3]);
   while (1) {
 		char c = getc();
-        if (c == '\n')
-            /* print_char('\r', wcat_boot_information->video_information, BLACK); */
-            k_print(wcat_boot_information->video_information, BLACK, "\r");
 
-        /* print_char(c, wcat_boot_information->video_information, BLACK); */
-        k_print(wcat_boot_information->video_information, BLACK, "%c", c);
+        if (('!' <= c) && (c <= '~')){
+            k_print(wcat_boot_information->video_information, BLACK, "%c", c);
+        } else if (c =='\n'){
+            k_print(wcat_boot_information->video_information, BLACK, "\r");
+        } else if (c == ' '){
+            k_print(wcat_boot_information->video_information, BLACK, " ");
+        }
 	}
 
   while (1)
