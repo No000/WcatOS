@@ -50,7 +50,9 @@ PUBLIC void k_back_color_change(COLOR color){
 }
 
 /* %0x系はsizeofを使えばいい */
-#define MAX64_DIGIT 64
+#define BIN_MAX64_DIGIT 64
+#define HEX_MAX64_DIGIT 16
+#define DEC_MAX64_DIGIT 20
 PUBLIC void k_print(VIDEO_INFO video_info, const char* format, ... ){
       va_list ap;
       va_start(ap, format);
@@ -72,7 +74,7 @@ PUBLIC void k_print(VIDEO_INFO video_info, const char* format, ... ){
                   draw_char(va_arg(ap, int), video_info);
                   break;
               case 'd':
-                  char dec_s[MAX64_DIGIT];
+                  char dec_s[DEC_MAX64_DIGIT];
                   uint64_t dec_len;
                   dec_len = dec2asc(dec_s, va_arg(ap, uint64_t));
                   for (int i = 0; i < dec_len; i++) {
@@ -80,7 +82,7 @@ PUBLIC void k_print(VIDEO_INFO video_info, const char* format, ... ){
                   }
                   break;
               case 'x':
-                  char hex_s[MAX64_DIGIT];
+                  char hex_s[HEX_MAX64_DIGIT];
                   uint64_t hex_len;
                   hex_len = hex2asc(hex_s, va_arg(ap, uint64_t));
                   for (int i = 0; i < hex_len; i++) {
@@ -88,7 +90,7 @@ PUBLIC void k_print(VIDEO_INFO video_info, const char* format, ... ){
                   }
                   break;
               case 'b':
-                  char bin_s[MAX64_DIGIT];
+                  char bin_s[BIN_MAX64_DIGIT];
                   uint64_t bin_len;
                   bin_len = bin2asc(bin_s, va_arg(ap, uint64_t));
                   for (int i = 0; i < bin_len; i++) {
@@ -106,7 +108,7 @@ PUBLIC void k_print(VIDEO_INFO video_info, const char* format, ... ){
 
 /* ASCIIの処理もここで行ってる */
 PRIVATE void draw_char(char c, VIDEO_INFO video_info) {
-    int x = 0, y = 0;
+    uint32_t x = 0, y = 0;
     switch (c) {
     case '\r':
         CURSOR_Y += FONT_HEIGHT;
