@@ -107,10 +107,8 @@ PUBLIC void k_print(VIDEO_INFO video_info, const char* format, ... ){
 /* ASCIIの処理もここで行ってる */
 PRIVATE void draw_char(char c, VIDEO_INFO video_info) {
     int x = 0, y = 0;
-    /* 実験なのでインデックスは0固定 */
     switch (c) {
     case '\r':
-        /* draw_control_char(c); */
         CURSOR_Y += FONT_HEIGHT;
         break;
     case '\t':
