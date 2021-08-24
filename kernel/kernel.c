@@ -233,20 +233,18 @@ typedef struct {
 #pragma pack()
 
 /* 全体に公開するための */
-struct WCAT_HEADER *wcat_information;
-struct WCATOS_CONTOROL_INFORMATION *wcat_contorol_information;
+struct WCAT_HEADER wcat_information;
+struct WCATOS_CONTOROL_INFORMATION wcat_contorol_information;
 
 
 
 
 void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   gop_init(wcat_boot_information);
-  /* drow_back_color(0xad, 0xff, 0x2f); */
-  drow_back_color(GREENYELLOW);
   k_terminal_init();
-
+  drow_back_color(wcat_contorol_information.kernel_terminal_information.terminal_back_color);
   wait_KBC_sendReady();
-
+  
 
   int i = 1234;
   k_print(wcat_boot_information->video_information, "dec: %d hex: %x bin: %b ", sizeof(i), i, i);
@@ -258,6 +256,7 @@ void kernel_main(struct WCAT_HEADER *wcat_boot_information) {
   k_print(wcat_boot_information->video_information, "%c", smtable->AnchorString[1]);
   k_print(wcat_boot_information->video_information, "%c", smtable->AnchorString[2]);
   k_print(wcat_boot_information->video_information, "%c", smtable->AnchorString[3]);
+  k_clear();
   while (1) {
 		char c = getc();
 

@@ -13,10 +13,11 @@
 #define FONT_HEIGHT 10
 #define FONT_WIDTH 8
 
-extern WCATOS_CONTOROL_INFORMATION *wcat_contorol_information;
-#define CURSOR_X wcat_contorol_information->kernel_terminal_information.cursor_x
-#define CURSOR_Y wcat_contorol_information->kernel_terminal_information.cursor_y
-#define TERMINAL_FONT_COLOR wcat_contorol_information->kernel_terminal_information.terminal_font_color
+extern WCATOS_CONTOROL_INFORMATION wcat_contorol_information;
+#define CURSOR_X wcat_contorol_information.kernel_terminal_information.cursor_x
+#define CURSOR_Y wcat_contorol_information.kernel_terminal_information.cursor_y
+#define TERMINAL_FONT_COLOR wcat_contorol_information.kernel_terminal_information.terminal_font_color
+#define TERMINAL_BACK_COLOR wcat_contorol_information.kernel_terminal_information.terminal_back_color
 
 #define TAB_WIDTH 4             /* 構造体で管理するようにする */
 
@@ -30,10 +31,22 @@ PUBLIC void k_terminal_init(){
     CURSOR_X = 0;
     CURSOR_Y = 0;
     TERMINAL_FONT_COLOR = BLACK;
+    TERMINAL_BACK_COLOR = WHITE;
 }
 
 PUBLIC void k_font_color_change(COLOR color){
     TERMINAL_FONT_COLOR = color;
+}
+
+PUBLIC void k_clear(){
+    CURSOR_X = 0;
+    CURSOR_Y = 0;
+    drow_back_color(wcat_contorol_information.kernel_terminal_information.terminal_back_color);
+    
+}
+
+PUBLIC void k_back_color_change(COLOR color){
+    wcat_contorol_information.kernel_terminal_information.terminal_back_color = AQUA;
 }
 
 /* %0x系はsizeofを使えばいい */

@@ -4,12 +4,14 @@
 #include <stdint.h>
 #include "../boot/WcatBootPkg/WcatBoot/wcat_boot_header.h"
 
+
+/* #pragma pack(1) */
 /* カラーを指定するための構造体 */
 typedef struct COLOR{
     uint8_t red;
     uint8_t green;
     uint8_t blue;
-} COLOR;
+}__attribute__((packed)) COLOR;
 
 
 typedef struct pixel_bit_mask{
@@ -17,8 +19,9 @@ typedef struct pixel_bit_mask{
     uint8_t green_mask;
     uint8_t red_mask;
     uint8_t reserved_mask;
-} pixel_bit_mask;
+}__attribute__((packed)) pixel_bit_mask;
 
+/* #pragma pack() */
 
 void gop_init(struct WCAT_HEADER *wcat_boot_information);
 

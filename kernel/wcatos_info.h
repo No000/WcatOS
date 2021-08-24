@@ -7,10 +7,12 @@
 
 typedef struct BASE_TERMINAL {
     uint64_t cursor_x;
+    COLOR terminal_back_color;
     uint64_t cursor_y;
     uint64_t tab_width;
     COLOR terminal_font_color;
-}BASE_TERMINAL;
+
+}__attribute__((packed)) BASE_TERMINAL;
 
 typedef struct WCATOS_CONTOROL_INFORMATION {
     BASE_TERMINAL kernel_terminal_information;
