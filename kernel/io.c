@@ -38,4 +38,5 @@ PUBLIC void out8(uint16_t addr, uint16_t data)
                       );
 }
 
-
+#undef PRIVATE
+#undef PUBLIC
