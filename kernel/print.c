@@ -29,7 +29,7 @@ PRIVATE uint64_t dec2asc(char *str, uint64_t dec);
 PRIVATE void draw_char(char c);
 PRIVATE void print_string(char* string);
 
-PUBLIC void k_terminal_init(){
+PUBLIC void k_terminal_init(void){
     CURSOR_X = 0;
     CURSOR_Y = 0;
     TERMINAL_FONT_COLOR = BLACK;
@@ -40,7 +40,7 @@ PUBLIC void k_font_color_change(COLOR color){
     TERMINAL_FONT_COLOR = color;
 }
 
-PUBLIC void k_clear(){
+PUBLIC void k_clear(void){
     CURSOR_X = 0;
     CURSOR_Y = 0;
     drow_back_color(wcat_contorol_information.kernel_terminal_information.terminal_back_color);
