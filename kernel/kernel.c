@@ -23,7 +23,7 @@
 #define FONT_WIDTH 8
 
 
-
+void hlt(void);
 
 void hlt() {
   __asm__("hlt");
@@ -42,7 +42,7 @@ void hlt() {
 #define KBC_STATUS_BIT_OBF	0x01
 
 /* 定義に関してはFreeBSDを参考 */
-const char keymap[] = {         /* keycodeの返り値を位置情報にしている */
+static const char keymap[] = {         /* keycodeの返り値を位置情報にしている */
 	ASCII_NOP,                  /* 0 */
     ASCII_ESC,                  /* 1 */
     '1',                        /* 2 */
@@ -174,7 +174,7 @@ const char keymap[] = {         /* keycodeの返り値を位置情報にして�
 };
 
 
-void wait_KBC_sendReady(void){
+static void wait_KBC_sendReady(void){
     while (1) {
         if((in8(0x64) & 0x02) == 0){
             break;
@@ -182,7 +182,7 @@ void wait_KBC_sendReady(void){
     }
 }
 
-unsigned char get_kbc_data(void)
+static unsigned char get_kbc_data(void)
 {
 	/* ステータスレジスタのOBFがセットされるまで待つ */
 	while (!(in8(KBC_STATUS_ADDR) & KBC_STATUS_BIT_OBF));
@@ -190,7 +190,7 @@ unsigned char get_kbc_data(void)
 	return in8(KBC_DATA_ADDR);
 }
 
-unsigned char get_keycode(void)
+static unsigned char get_keycode(void)
 {
 	unsigned char keycode;
 
@@ -200,7 +200,7 @@ unsigned char get_keycode(void)
 	return keycode;
 }
 
-char getc(void)
+static char getc(void)
 {
 	return keymap[get_keycode()];
 }
