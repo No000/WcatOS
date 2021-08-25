@@ -28,8 +28,7 @@ void gop_init(struct WCAT_HEADER *wcat_boot_information);
 
 void drow_back_color(COLOR color);
 
-void drow_pixel(uint32_t x, uint32_t y, COLOR pixel_color,
-                VIDEO_INFO video_infomation);
+void drow_pixel(uint32_t x, uint32_t y, COLOR pixel_color);
 
 void drow_horizon_pixel(uint32_t start_x, uint32_t start_y, uint32_t end_x,
                         COLOR pixel_color, VIDEO_INFO video_info);
