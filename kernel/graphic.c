@@ -2,10 +2,13 @@
 #include "../boot/WcatBootPkg/WcatBoot/wcat_boot_header.h" /* シンボリックリンクに変更をする */
 #include "wcatos_info.h"
 
+#define PRIVATE static
+#define PUBLIC
+
 extern WCATOS_CONTOROL_INFORMATION wcat_contorol_information;
 extern WCAT_HEADER wcat_information;
 
-void gop_init(struct WCAT_HEADER *wcat_boot_information){
+PUBLIC void gop_init(struct WCAT_HEADER *wcat_boot_information){
     wcat_information.video_information.frame_buffer_addr = wcat_boot_information->video_information.frame_buffer_addr;
     wcat_information.video_information.frame_buffer_size = wcat_boot_information->video_information.frame_buffer_size;
     wcat_information.video_information.horizen_size =  wcat_boot_information->video_information.horizen_size;
@@ -13,7 +16,7 @@ void gop_init(struct WCAT_HEADER *wcat_boot_information){
     wcat_information.video_information.pixel_per_scanline = wcat_boot_information->video_information.pixel_per_scanline;
 }
 
-void drow_back_color(COLOR color){
+PUBLIC void drow_back_color(COLOR color){
     pixel_bit_mask *frame_buffer = (pixel_bit_mask *)wcat_information.video_information.frame_buffer_addr;
     for (uint32_t i = 0; i < wcat_information.video_information.frame_buffer_size; ++i) {
         frame_buffer[i].red_mask = color.red;
@@ -26,7 +29,7 @@ void drow_back_color(COLOR color){
 }
 
 /* 1ピクセル描画関数 */
-void drow_pixel(uint32_t x, uint32_t y, COLOR pixel_color) {
+PUBLIC void drow_pixel(uint32_t x, uint32_t y, COLOR pixel_color) {
   pixel_bit_mask *p = (pixel_bit_mask *)wcat_information.video_information.frame_buffer_addr;
   uint32_t hr = wcat_information.video_information.horizen_size;
   pixel_bit_mask *draw_pixel_address = p + (hr * y) + x;
@@ -36,7 +39,7 @@ void drow_pixel(uint32_t x, uint32_t y, COLOR pixel_color) {
 }
 
 /* 水平描画関数 */
-void drow_horizon_pixel(uint32_t start_x, uint32_t start_y, uint32_t end_x, COLOR pixel_color, VIDEO_INFO video_info)
+PUBLIC void drow_horizon_pixel(uint32_t start_x, uint32_t start_y, uint32_t end_x, COLOR pixel_color, VIDEO_INFO video_info)
 {
   int i = 0;
   for (i = start_x; i < end_x; i++) {
@@ -45,9 +48,12 @@ void drow_horizon_pixel(uint32_t start_x, uint32_t start_y, uint32_t end_x, COLO
 }
 
 /* 垂直描画関数 */
-void drow_vertical_pixel(uint32_t start_x, uint32_t start_y, uint32_t end_y, COLOR pixel_color, VIDEO_INFO video_info) {
+PUBLIC void drow_vertical_pixel(uint32_t start_x, uint32_t start_y, uint32_t end_y, COLOR pixel_color, VIDEO_INFO video_info) {
   int i = 0;
   for (i = start_y; i < end_y; i++) {
     drow_pixel(start_x, i, pixel_color);
 	  }
 }
+
+#undef PRIVATE
+#undef PUBLIC
