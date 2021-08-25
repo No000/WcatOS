@@ -197,4 +197,7 @@ PRIVATE uint64_t bin2asc(char *str, uint64_t bin){
 #undef CURSOR_X
 #undef CURSOR_Y
 #undef TERMINAL_FONT_COLOR
+#undef BIN_MAX64_DIGIT
+#undef HEX_MAX64_DIGIT
+#undef DEC_MAX64_DIGIT
 
