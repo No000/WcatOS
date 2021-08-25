@@ -203,3 +203,5 @@ PRIVATE uint64_t bin2asc(char *str, uint64_t bin){
 #undef HEX_MAX64_DIGIT
 #undef DEC_MAX64_DIGIT
 
+#undef PRIVATE
+#undef PUBLIC
