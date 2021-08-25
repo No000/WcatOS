@@ -1,5 +1,5 @@
-#ifndef _WCAT_BOOT_HEADER_H_
-#define _WCAT_BOOT_HEADER_H_
+#ifndef WCAT_BOOT_HEADER_H_
+#define WCAT_BOOT_HEADER_H_
 #include <stdint.h>
 
 

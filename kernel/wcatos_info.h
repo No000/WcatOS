@@ -1,5 +1,5 @@
-#ifndef _WCATOS_INFO_H_
-#define _WCATOS_INFO_H_
+#ifndef WCATOS_INFO_H_
+#define WCATOS_INFO_H_
 
 #include <stdint.h>
 #include "graphic.h"

@@ -1,4 +1,4 @@
-#ifndef _KBC_H_
-#define _KBC_H_
+#ifndef KBC_H_
+#define KBC_H_
 
 #endif

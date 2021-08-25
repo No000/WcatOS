@@ -1,5 +1,5 @@
-#ifndef _GRAPHIC_H_
-#define _GRAPHIC_H_
+#ifndef GRAPHIC_H_
+#define GRAPHIC_H_
 
 #include <stdint.h>
 #include "../boot/WcatBootPkg/WcatBoot/wcat_boot_header.h"
