@@ -1,6 +1,7 @@
 -nostdlibinc
 -std=c17
 -fno-exceptions
--Wno-incompatible-pointer-types
 -fms-extensions
 -ffreestanding
+-Wall
+
