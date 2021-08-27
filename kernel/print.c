@@ -114,12 +114,14 @@ PRIVATE void draw_char(char c) {
     switch (c) {
     case '\r':
         CURSOR_Y += FONT_HEIGHT; /* ここでveriticalsizeのif分岐を追加（bug） */
+        CURSOR_X = 0;
         break;
     case '\t':
         CURSOR_X += (TAB_WIDTH * FONT_WIDTH);/* ここでhorizen_sizeのif分岐を追加（bug） */
         break;
     case '\n':
         CURSOR_Y += FONT_HEIGHT;
+        CURSOR_X = 0;
         break;
     default:
         for (y = 0; y < FONT_HEIGHT; y++) {
