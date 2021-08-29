@@ -113,13 +113,28 @@ PRIVATE void draw_char(char c) {
     uint32_t x = 0, y = 0;
     switch (c) {
     case '\r':
+        if ((CURSOR_Y + FONT_HEIGHT)>= wcat_information.video_information.vertical_size) {
+            CURSOR_Y = 0;
+            CURSOR_X = 0;
+            break;
+        }
         CURSOR_Y += FONT_HEIGHT; /* ここでveriticalsizeのif分岐を追加（bug） */
         CURSOR_X = 0;
         break;
     case '\t':
+        if ((CURSOR_X + FONT_WIDTH) >= wcat_information.video_information.horizen_size) {
+            CURSOR_Y += FONT_HEIGHT;
+            CURSOR_X = 0;       /* 強制的に0にリセット */
+            break;
+        }
         CURSOR_X += (TAB_WIDTH * FONT_WIDTH);/* ここでhorizen_sizeのif分岐を追加（bug） */
         break;
     case '\n':
+        if ((CURSOR_Y + FONT_HEIGHT)>= wcat_information.video_information.vertical_size) {
+            CURSOR_Y = 0;
+            CURSOR_X = 0;
+            break;
+        }
         CURSOR_Y += FONT_HEIGHT;
         CURSOR_X = 0;
         break;
