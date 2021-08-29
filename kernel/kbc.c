@@ -183,3 +183,5 @@ char getc(void)
 {
 	return keymap[get_keycode()];
 }
+
+

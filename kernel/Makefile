@@ -42,7 +42,10 @@ print.o: print.c print.h
 io.o: io.c io.h
 	$(CC) $(CFLAGS) -c $<
 
-kernel.elf: kernel.o graphic.o print.o io.o
+kbc.o: kbc.c kbc.h
+	$(CC) $(CFLAGS) -c $<
+
+kernel.elf: kernel.o graphic.o print.o io.o kbc.o
 	$(LD) $(LDFLAGS) -o $@ $^
 
 clean:
