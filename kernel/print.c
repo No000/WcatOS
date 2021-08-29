@@ -111,6 +111,12 @@ PUBLIC void k_print(const char* format, ... ){
 /* ASCIIの処理もここで行ってる */
 PRIVATE void draw_char(char c) {
     uint32_t x = 0, y = 0;
+    /* 既存の文字の削除 */
+    for (y = 0; y < FONT_HEIGHT; y++) {
+        for (x = 0; x < FONT_WIDTH; x++) {
+            drow_pixel(CURSOR_X + x, CURSOR_Y + y, TERMINAL_BACK_COLOR);
+        }
+    }
     switch (c) {
     case '\r':
         if ((CURSOR_Y + FONT_HEIGHT)>= wcat_information.video_information.vertical_size) {
